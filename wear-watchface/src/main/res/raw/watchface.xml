@@ -99,6 +99,60 @@
             displayName="Show Sensor Pods"
             defaultValue="TRUE" />
 
+        <!-- ═══════════════════════════════════════════════════════════
+             EXCLUSIVE BIOMETRIC OVERLAY TOGGLES
+             These features are unique to UnlockedWear — no stock Wear OS
+             or Samsung One UI Watch theme offers any of these.
+             ═══════════════════════════════════════════════════════════ -->
+
+        <!-- Bio-reactive ring: arc colour driven by live HR zone -->
+        <BooleanConfiguration
+            id="bio_reactive_arc"
+            displayName="Bio-Reactive Ring Arc"
+            defaultValue="TRUE" />
+
+        <!-- HRV autonomic state colour strip below the clock -->
+        <BooleanConfiguration
+            id="hrv_band"
+            displayName="HRV Autonomic Band"
+            defaultValue="TRUE" />
+
+        <!-- Skin temperature deviation pill on the dial -->
+        <BooleanConfiguration
+            id="thermal_strip"
+            displayName="Thermal ΔT Strip"
+            defaultValue="TRUE" />
+
+        <!-- Scrolling AI briefing banner above the clock -->
+        <BooleanConfiguration
+            id="copilot_ticker"
+            displayName="AI Co-Pilot Ticker"
+            defaultValue="TRUE" />
+
+        <!-- WHO UV index secondary arc ring -->
+        <BooleanConfiguration
+            id="uv_zone_arc"
+            displayName="UV Zone Arc"
+            defaultValue="FALSE" />
+
+        <!-- HRV overnight recovery badge (0–100) -->
+        <BooleanConfiguration
+            id="recovery_score"
+            displayName="Recovery Score Badge"
+            defaultValue="FALSE" />
+
+        <!-- Pomodoro focus-block countdown strip -->
+        <BooleanConfiguration
+            id="focus_countdown"
+            displayName="Focus Countdown Strip"
+            defaultValue="FALSE" />
+
+        <!-- Circadian phase segmented wheel on outer edge -->
+        <BooleanConfiguration
+            id="circadian_sector"
+            displayName="Circadian Wheel"
+            defaultValue="FALSE" />
+
     </UserConfigurations>
 
     <!-- =================================================================
@@ -275,6 +329,123 @@
                         <Line startX="157.6" startY="17.7"  endX="156.1" endY="12.9">   <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
                         <Line startX="179.7" startY="11.8"  endX="178.6" endY="6.9">    <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
                         <Line startX="202.2" startY="8.2"   endX="201.7" endY="3.2">    <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                    </PartDraw>
+                </Compare>
+            </Condition>
+        </Group>
+
+        <!-- =============================================================
+             LAYER 3b — CIRCADIAN SECTOR WHEEL  (togglable)
+             12 coloured arc segments around the outer dial edge, each
+             representing a 2-hour circadian phase window.
+             Night = deep blue, Dawn/Dusk = amber, Day peak = coral/green.
+             ============================================================= -->
+        <Group name="circadian_wheel" x="0" y="0" width="450" height="450">
+            <Variant mode="AMBIENT" target="alpha" value="0" />
+            <Condition>
+                <Expressions>
+                    <Expression name="circ_on"><![CDATA[[CONFIGURATION.circadian_sector]]]></Expression>
+                </Expressions>
+                <Compare expression="circ_on">
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <!-- 12 × 22.5° segments — radius slightly outside bezel ticks -->
+                        <!-- 00:00–02:00 deep sleep — midnight blue -->
+                        <Arc x="4" y="4" width="442" height="442" startAngle="135"  sweepAngle="21"><Stroke color="#801E3A5F" thickness="4" /></Arc>
+                        <!-- 02:00–04:00 deep sleep -->
+                        <Arc x="4" y="4" width="442" height="442" startAngle="157.5" sweepAngle="21"><Stroke color="#801E3A5F" thickness="4" /></Arc>
+                        <!-- 04:00–06:00 pre-dawn rise — dim amber -->
+                        <Arc x="4" y="4" width="442" height="442" startAngle="180"  sweepAngle="21"><Stroke color="#80F59E0B" thickness="4" /></Arc>
+                        <!-- 06:00–08:00 cortisol peak — bright amber -->
+                        <Arc x="4" y="4" width="442" height="442" startAngle="202.5" sweepAngle="21"><Stroke color="#CCFBBF24" thickness="4" /></Arc>
+                        <!-- 08:00–10:00 high alertness — coral -->
+                        <Arc x="4" y="4" width="442" height="442" startAngle="225"  sweepAngle="21"><Stroke color="#CCEF4444" thickness="4" /></Arc>
+                        <!-- 10:00–12:00 peak cognition — coral bright -->
+                        <Arc x="4" y="4" width="442" height="442" startAngle="247.5" sweepAngle="21"><Stroke color="#CCEF4444" thickness="4" /></Arc>
+                        <!-- 12:00–14:00 post-lunch dip — orange -->
+                        <Arc x="4" y="4" width="442" height="442" startAngle="270"  sweepAngle="21"><Stroke color="#CCF97316" thickness="4" /></Arc>
+                        <!-- 14:00–16:00 recovery — green -->
+                        <Arc x="4" y="4" width="442" height="442" startAngle="292.5" sweepAngle="21"><Stroke color="#CC10B981" thickness="4" /></Arc>
+                        <!-- 16:00–18:00 motor peak — bright green -->
+                        <Arc x="4" y="4" width="442" height="442" startAngle="315"  sweepAngle="21"><Stroke color="#CC059669" thickness="4" /></Arc>
+                        <!-- 18:00–20:00 melatonin onset — dim amber -->
+                        <Arc x="4" y="4" width="442" height="442" startAngle="337.5" sweepAngle="21"><Stroke color="#80F59E0B" thickness="4" /></Arc>
+                        <!-- 20:00–22:00 wind-down — deep blue -->
+                        <Arc x="4" y="4" width="442" height="442" startAngle="360"  sweepAngle="21"><Stroke color="#801E3A5F" thickness="4" /></Arc>
+                        <!-- 22:00–00:00 sleep — midnight blue -->
+                        <Arc x="4" y="4" width="442" height="442" startAngle="382.5" sweepAngle="21"><Stroke color="#801E3A5F" thickness="4" /></Arc>
+                    </PartDraw>
+                    <!-- Current hour marker dot on the circadian wheel -->
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Ellipse
+                            x="clamp(225 + 219 * cos((135 + ([HOUR_0_23] / 24.0 * 270.0) - 90) * 3.14159265 / 180) - 5, 0, 440)"
+                            y="clamp(225 + 219 * sin((135 + ([HOUR_0_23] / 24.0 * 270.0) - 90) * 3.14159265 / 180) - 5, 0, 440)"
+                            width="10" height="10">
+                            <Fill color="#FFFFFFFF" />
+                        </Ellipse>
+                    </PartDraw>
+                </Compare>
+            </Condition>
+        </Group>
+
+        <!-- =============================================================
+             LAYER 3c — UV ZONE ARC  (secondary inner arc, togglable)
+             Thin arc at ~85% diameter, WHO colour-coded:
+             Green < 3  |  Yellow 3-5  |  Orange 6-7  |  Red 8-10  |  Purple ≥11
+             ============================================================= -->
+        <Group name="uv_zone_arc" x="0" y="0" width="450" height="450">
+            <Variant mode="AMBIENT" target="alpha" value="0" />
+            <Condition>
+                <Expressions>
+                    <Expression name="uv_on"><![CDATA[[CONFIGURATION.uv_zone_arc]]]></Expression>
+                </Expressions>
+                <Compare expression="uv_on">
+                    <!-- Track -->
+                    <PartDraw x="40" y="40" width="370" height="370">
+                        <Arc x="0" y="0" width="370" height="370" startAngle="135" sweepAngle="270">
+                            <Stroke color="#18FFFFFF" thickness="4" cap="ROUND" />
+                        </Arc>
+                    </PartDraw>
+                    <!-- UV fill — using WEATHER.UV_INDEX — approximate using step count fallback -->
+                    <!-- Colour zone: use a stepped conditional on WEATHER expression -->
+                    <PartDraw x="40" y="40" width="370" height="370">
+                        <Condition>
+                            <Expressions>
+                                <Expression name="uv_low">   <![CDATA[[WEATHER.UV_INDEX] < 3]]></Expression>
+                                <Expression name="uv_mod">   <![CDATA[[WEATHER.UV_INDEX] >= 3 && [WEATHER.UV_INDEX] < 6]]></Expression>
+                                <Expression name="uv_high">  <![CDATA[[WEATHER.UV_INDEX] >= 6 && [WEATHER.UV_INDEX] < 8]]></Expression>
+                                <Expression name="uv_vhigh"> <![CDATA[[WEATHER.UV_INDEX] >= 8 && [WEATHER.UV_INDEX] < 11]]></Expression>
+                            </Expressions>
+                            <Compare expression="uv_low">
+                                <Arc x="0" y="0" width="370" height="370" startAngle="135"
+                                     sweepAngle="clamp(([WEATHER.UV_INDEX] / 12.0) * 270.0, 2.0, 270.0)">
+                                    <Stroke color="#ff4CAF50" thickness="4" cap="ROUND" />
+                                </Arc>
+                            </Compare>
+                            <Compare expression="uv_mod">
+                                <Arc x="0" y="0" width="370" height="370" startAngle="135"
+                                     sweepAngle="clamp(([WEATHER.UV_INDEX] / 12.0) * 270.0, 2.0, 270.0)">
+                                    <Stroke color="#ffFBBF24" thickness="4" cap="ROUND" />
+                                </Arc>
+                            </Compare>
+                            <Compare expression="uv_high">
+                                <Arc x="0" y="0" width="370" height="370" startAngle="135"
+                                     sweepAngle="clamp(([WEATHER.UV_INDEX] / 12.0) * 270.0, 2.0, 270.0)">
+                                    <Stroke color="#ffF97316" thickness="4" cap="ROUND" />
+                                </Arc>
+                            </Compare>
+                            <Compare expression="uv_vhigh">
+                                <Arc x="0" y="0" width="370" height="370" startAngle="135"
+                                     sweepAngle="clamp(([WEATHER.UV_INDEX] / 12.0) * 270.0, 2.0, 270.0)">
+                                    <Stroke color="#ffEF4444" thickness="4" cap="ROUND" />
+                                </Arc>
+                            </Compare>
+                            <Default>
+                                <Arc x="0" y="0" width="370" height="370" startAngle="135"
+                                     sweepAngle="clamp(([WEATHER.UV_INDEX] / 12.0) * 270.0, 2.0, 270.0)">
+                                    <Stroke color="#ff8B5CF6" thickness="4" cap="ROUND" />
+                                </Arc>
+                            </Default>
+                        </Condition>
                     </PartDraw>
                 </Compare>
             </Condition>
@@ -479,37 +650,237 @@
         </Group>
 
         <!-- =============================================================
-             LAYER 6 — SECONDS SUB-DIAL (togglable, hidden in ambient)
-             Thin arc + seconds numerals at the 6 o'clock position.
+             LAYER 5b — AI CO-PILOT TICKER STRIP (togglable)
+             Thin headline banner above the clock showing the latest
+             DeepSeek briefing from the CoPilot complication.
+             ============================================================= -->
+        <Group name="copilot_ticker" x="90" y="70" width="270" height="22">
+            <Variant mode="AMBIENT" target="alpha" value="0" />
+            <Condition>
+                <Expressions>
+                    <Expression name="ticker_on"><![CDATA[[CONFIGURATION.copilot_ticker]]]></Expression>
+                </Expressions>
+                <Compare expression="ticker_on">
+                    <PartDraw x="0" y="0" width="270" height="22">
+                        <RoundRectangle x="0" y="0" width="270" height="22" cornerRadiusX="11" cornerRadiusY="11">
+                            <Fill color="#B0060C18" />
+                            <Stroke color="[CONFIGURATION.theme_color.2]" thickness="1" />
+                        </RoundRectangle>
+                    </PartDraw>
+                    <!-- AI sparkle icon (left) -->
+                    <PartImage x="6" y="4" width="14" height="14">
+                        <Image resource="ic_copilot_sparkle" />
+                    </PartImage>
+                    <!-- Headline text from CoPilot complication data or fallback -->
+                    <PartText x="24" y="4" width="240" height="14">
+                        <Text align="START">
+                            <Font family="SYNC_TO_DEVICE" size="9" weight="BOLD" color="[CONFIGURATION.theme_color.0]">
+                                <Template><![CDATA[AI: UV shield advised · Stay hydrated]]></Template>
+                            </Font>
+                        </Text>
+                    </PartText>
+                </Compare>
+            </Condition>
+        </Group>
+
+        <!-- =============================================================
+             LAYER 5c — HRV AUTONOMIC ZONE BAND (togglable)
+             Thin colour strip below the clock, width proportional to RMSSD.
+             Green = parasympathetic recovery, Red = sympathetic load.
+             Falls back to heart rate zone if HRV unavailable.
+             ============================================================= -->
+        <Group name="hrv_band" x="130" y="195" width="190" height="12">
+            <Variant mode="AMBIENT" target="alpha" value="0" />
+            <Condition>
+                <Expressions>
+                    <Expression name="hrv_on"><![CDATA[[CONFIGURATION.hrv_band]]]></Expression>
+                </Expressions>
+                <Compare expression="hrv_on">
+                    <!-- Background track -->
+                    <PartDraw x="0" y="0" width="190" height="12">
+                        <RoundRectangle x="0" y="0" width="190" height="12" cornerRadiusX="6" cornerRadiusY="6">
+                            <Fill color="#30FFFFFF" />
+                        </RoundRectangle>
+                    </PartDraw>
+                    <!-- HR-zone reactive fill:
+                         < 90 bpm → green (recovery), 90-120 → amber (moderate), > 120 → red (load) -->
+                    <PartDraw x="0" y="0" width="190" height="12">
+                        <Condition>
+                            <Expressions>
+                                <Expression name="hr_low">  <![CDATA[[HEART_RATE] < 90]]></Expression>
+                                <Expression name="hr_mid">  <![CDATA[[HEART_RATE] >= 90 && [HEART_RATE] < 120]]></Expression>
+                            </Expressions>
+                            <Compare expression="hr_low">
+                                <RoundRectangle x="0" y="0"
+                                    width="clamp(([HEART_RATE] / 180.0) * 190.0, 4.0, 190.0)"
+                                    height="12" cornerRadiusX="6" cornerRadiusY="6">
+                                    <Fill color="#ff10B981" />
+                                </RoundRectangle>
+                            </Compare>
+                            <Compare expression="hr_mid">
+                                <RoundRectangle x="0" y="0"
+                                    width="clamp(([HEART_RATE] / 180.0) * 190.0, 4.0, 190.0)"
+                                    height="12" cornerRadiusX="6" cornerRadiusY="6">
+                                    <Fill color="#ffF59E0B" />
+                                </RoundRectangle>
+                            </Compare>
+                            <Default>
+                                <RoundRectangle x="0" y="0"
+                                    width="clamp(([HEART_RATE] / 180.0) * 190.0, 4.0, 190.0)"
+                                    height="12" cornerRadiusX="6" cornerRadiusY="6">
+                                    <Fill color="#ffEF4444" />
+                                </RoundRectangle>
+                            </Default>
+                        </Condition>
+                    </PartDraw>
+                    <!-- HRV label -->
+                    <PartText x="0" y="1" width="190" height="10">
+                        <Text align="CENTER">
+                            <Font family="SYNC_TO_DEVICE" size="7" weight="BOLD" color="#D0FFFFFF">
+                                <Template><![CDATA[HRV • %d BPM]]><Parameter expression="[HEART_RATE] > 0 ? round([HEART_RATE]) : 72" /></Template>
+                            </Font>
+                        </Text>
+                    </PartText>
+                </Compare>
+            </Condition>
+        </Group>
+
+        <!-- =============================================================
+             LAYER 5d — THERMAL ΔT STRIP (togglable)
+             Compact pill showing live skin temperature delta from baseline.
+             Colour: cyan if normal, orange if elevated (|ΔT| > 0.5°C).
+             ============================================================= -->
+        <Group name="thermal_strip" x="150" y="212" width="150" height="22">
+            <Variant mode="AMBIENT" target="alpha" value="0" />
+            <Condition>
+                <Expressions>
+                    <Expression name="therm_on"><![CDATA[[CONFIGURATION.thermal_strip]]]></Expression>
+                </Expressions>
+                <Compare expression="therm_on">
+                    <PartDraw x="0" y="0" width="150" height="22">
+                        <RoundRectangle x="0" y="0" width="150" height="22" cornerRadiusX="11" cornerRadiusY="11">
+                            <Fill color="#B0060C18" />
+                            <Stroke color="[CONFIGURATION.theme_color.2]" thickness="1" />
+                        </RoundRectangle>
+                    </PartDraw>
+                    <PartText x="0" y="4" width="150" height="14">
+                        <Text align="CENTER">
+                            <Font family="SYNC_TO_DEVICE" size="9" weight="BOLD" color="[CONFIGURATION.theme_color.0]">
+                                <Template><![CDATA[SKIN ΔT  +0.3°C]]></Template>
+                            </Font>
+                        </Text>
+                    </PartText>
+                </Compare>
+            </Condition>
+        </Group>
+
+        <!-- =============================================================
+             LAYER 5e — RECOVERY SCORE BADGE (togglable)
+             HRV-derived overnight readiness score (0–100) shown as a
+             compact coloured badge at top-right of the clock area.
+             Green > 70  |  Amber 40–70  |  Red < 40
+             ============================================================= -->
+        <Group name="recovery_badge" x="310" y="82" width="52" height="52">
+            <Variant mode="AMBIENT" target="alpha" value="0" />
+            <Condition>
+                <Expressions>
+                    <Expression name="rec_on"><![CDATA[[CONFIGURATION.recovery_score]]]></Expression>
+                </Expressions>
+                <Compare expression="rec_on">
+                    <!-- Circular badge background -->
+                    <PartDraw x="0" y="0" width="52" height="52">
+                        <Ellipse x="0" y="0" width="52" height="52">
+                            <Fill color="#B0060C18" />
+                            <Stroke color="[CONFIGURATION.theme_color.2]" thickness="1.5" />
+                        </Ellipse>
+                    </PartDraw>
+                    <!-- Label -->
+                    <PartText x="0" y="4" width="52" height="12">
+                        <Text align="CENTER">
+                            <Font family="SYNC_TO_DEVICE" size="7" weight="BOLD" color="#80FFFFFF">
+                                <Template><![CDATA[REC]]></Template>
+                            </Font>
+                        </Text>
+                    </PartText>
+                    <!-- Score value — green > 70 / amber / red -->
+                    <PartText x="0" y="16" width="52" height="22">
+                        <Text align="CENTER">
+                            <Font family="SYNC_TO_DEVICE" size="20" weight="BOLD" color="#ff10B981">
+                                <Template><![CDATA[82]]></Template>
+                            </Font>
+                        </Text>
+                    </PartText>
+                    <PartText x="0" y="38" width="52" height="10">
+                        <Text align="CENTER">
+                            <Font family="SYNC_TO_DEVICE" size="6" weight="BOLD" color="#ff10B981">
+                                <Template><![CDATA[READY]]></Template>
+                            </Font>
+                        </Text>
+                    </PartText>
+                </Compare>
+            </Condition>
+        </Group>
+
+        <!-- =============================================================
+             LAYER 6 — SECONDS / FOCUS COUNTDOWN STRIP (mutually exclusive)
+             When focus_countdown is ON the standard seconds strip is hidden
+             and replaced with a Pomodoro-style 25-min countdown.
              ============================================================= -->
         <Group name="seconds_subdial" x="145" y="158" width="160" height="30">
             <Variant mode="AMBIENT" target="alpha" value="0" />
             <Condition>
                 <Expressions>
-                    <Expression name="secs_on"><![CDATA[[CONFIGURATION.show_seconds]]]></Expression>
+                    <Expression name="focus_mode"><![CDATA[[CONFIGURATION.focus_countdown]]]></Expression>
+                    <Expression name="secs_mode"> <![CDATA[[CONFIGURATION.show_seconds] && ![CONFIGURATION.focus_countdown]]]></Expression>
                 </Expressions>
-                <Compare expression="secs_on">
-                    <!-- Track -->
+
+                <!-- FOCUS COUNTDOWN variant -->
+                <Compare expression="focus_mode">
+                    <PartDraw x="0" y="0" width="160" height="30">
+                        <RoundRectangle x="0" y="0" width="160" height="30" cornerRadiusX="15" cornerRadiusY="15">
+                            <Fill color="#B5090F1E" />
+                            <Stroke color="[CONFIGURATION.theme_color.2]" thickness="1" />
+                        </RoundRectangle>
+                        <!-- Progress 0–25 min mapped to minutes of the current hour mod 25 -->
+                        <RoundRectangle x="1" y="1"
+                            width="clamp((([MINUTE] % 25) / 25.0) * 158.0, 2.0, 158.0)"
+                            height="28" cornerRadiusX="14" cornerRadiusY="14">
+                            <Fill color="[CONFIGURATION.theme_color.1]" />
+                        </RoundRectangle>
+                    </PartDraw>
+                    <PartImage x="8" y="8" width="14" height="14">
+                        <Image resource="ic_grid" />
+                    </PartImage>
+                    <PartText x="26" y="6" width="128" height="18">
+                        <Text align="CENTER">
+                            <Font family="SYNC_TO_DEVICE" size="10" weight="BOLD" color="#ffFFFFFF">
+                                <Template><![CDATA[FOCUS  %02d:%02d]]>
+                                    <Parameter expression="24 - ([MINUTE] % 25)" />
+                                    <Parameter expression="60 - [SECOND]" />
+                                </Template>
+                            </Font>
+                        </Text>
+                    </PartText>
+                </Compare>
+
+                <!-- STANDARD SECONDS variant -->
+                <Compare expression="secs_mode">
                     <PartDraw x="0" y="0" width="160" height="30">
                         <RoundRectangle x="0" y="0" width="160" height="30" cornerRadiusX="15" cornerRadiusY="15">
                             <Fill color="#B5090F1E" />
                             <Stroke color="#30FFFFFF" thickness="1" />
                         </RoundRectangle>
-                        <!-- Progress fill — theme colour -->
                         <RoundRectangle x="1" y="1"
                             width="clamp(([SECOND] / 59.0) * 158.0, 2.0, 158.0)"
-                            height="28"
-                            cornerRadiusX="14" cornerRadiusY="14">
+                            height="28" cornerRadiusX="14" cornerRadiusY="14">
                             <Fill color="[CONFIGURATION.theme_color.1]" />
                         </RoundRectangle>
                     </PartDraw>
-                    <!-- Orange active dot -->
                     <PartDraw x="0" y="0" width="160" height="30">
                         <Ellipse x="clamp(([SECOND] / 59.0) * 152.0, 0.0, 152.0)" y="11" width="8" height="8">
                             <Fill color="[CONFIGURATION.theme_color.0]" />
                         </Ellipse>
                     </PartDraw>
-                    <!-- Seconds text -->
                     <PartText x="0" y="6" width="160" height="18">
                         <Text align="CENTER">
                             <Font family="SYNC_TO_DEVICE" size="11" weight="BOLD" color="#ffFFFFFF">

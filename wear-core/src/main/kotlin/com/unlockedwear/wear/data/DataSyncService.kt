@@ -342,7 +342,7 @@ class DataSyncService : WearableListenerService() {
                     val map = dataMapItem.dataMap
                     serviceScope.launch {
                         try {
-                            val jsonStr = map.getString("json", null)
+                            val jsonStr = map.getString("json", "").takeIf { it.isNotEmpty() }
                             if (jsonStr != null) {
                                 val flags = json.decodeFromString<WatchFaceFeatureFlags>(jsonStr)
                                 watchFaceConfigDataStore.applyFeatureFlags(flags)

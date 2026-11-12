@@ -32,6 +32,16 @@
     <string name="show_seconds_label">Seconds Telemetry</string>
     <string name="show_bezel_label">Technical Bezel Ticks</string>
 
+    <!-- Exclusive biometric overlay toggles -->
+    <string name="bio_reactive_arc_label">Bio-Reactive Ring Arc</string>
+    <string name="hrv_band_label">HRV Autonomic Band</string>
+    <string name="thermal_strip_label">Thermal ΔT Strip</string>
+    <string name="copilot_ticker_label">AI Co-Pilot Ticker</string>
+    <string name="uv_zone_arc_label">UV Zone Arc</string>
+    <string name="recovery_score_label">Recovery Score Badge</string>
+    <string name="focus_countdown_label">Focus Countdown Strip</string>
+    <string name="circadian_sector_label">Circadian Phase Wheel</string>
+
     <!-- Telemetry Badges -->
     <string name="badge_mission_control">MISSION CTRL</string>
     <string name="badge_active">ACTIVE</string>

@@ -8,7 +8,6 @@
 [![Watch Face Format](https://img.shields.io/badge/WFF-v2_Declarative-34A853?logo=android)](https://developer.android.com/training/wearables/wff)
 [![Samsung SDK](https://img.shields.io/badge/Samsung_Health_Sensor_SDK-1.4.1-1428A0)](https://developer.samsung.com/health)
 [![Android](https://img.shields.io/badge/Android-15_API_35-3DDC84?logo=android)](https://developer.android.com)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
 ---
 
@@ -229,24 +228,4 @@ adb -s <WATCH_DEVICE_ID> install -r wear-watchface/build/outputs/apk/debug/wear-
 
 # 5. Build and install Mobile Hub companion to Galaxy S25
 ./gradlew :mobile-hub:installDebug
-```
-
----
-
-## License
-
-```
-Copyright 2026 Gurkirat Singh / UnlockedWear
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
 ```
