@@ -122,6 +122,32 @@ class AppPreferences @Inject constructor(
         prefs.edit().putString(KEY_WF_DIAL_STYLE, style).apply()
     }
 
+    // ── Feature flags ────────────────────────────────────────────────────────
+
+    fun getWatchFaceBioReactiveArc(): Boolean  = prefs.getBoolean(KEY_WF_BIO_REACTIVE_ARC,  true)
+    fun setWatchFaceBioReactiveArc(v: Boolean) { prefs.edit().putBoolean(KEY_WF_BIO_REACTIVE_ARC,  v).apply() }
+
+    fun getWatchFaceHrvBand(): Boolean         = prefs.getBoolean(KEY_WF_HRV_BAND,          true)
+    fun setWatchFaceHrvBand(v: Boolean)        { prefs.edit().putBoolean(KEY_WF_HRV_BAND,          v).apply() }
+
+    fun getWatchFaceCircadianSector(): Boolean = prefs.getBoolean(KEY_WF_CIRCADIAN_SECTOR,  false)
+    fun setWatchFaceCircadianSector(v: Boolean){ prefs.edit().putBoolean(KEY_WF_CIRCADIAN_SECTOR,  v).apply() }
+
+    fun getWatchFaceThermalStrip(): Boolean    = prefs.getBoolean(KEY_WF_THERMAL_STRIP,     true)
+    fun setWatchFaceThermalStrip(v: Boolean)   { prefs.edit().putBoolean(KEY_WF_THERMAL_STRIP,     v).apply() }
+
+    fun getWatchFaceCoPilotTicker(): Boolean   = prefs.getBoolean(KEY_WF_COPILOT_TICKER,    true)
+    fun setWatchFaceCoPilotTicker(v: Boolean)  { prefs.edit().putBoolean(KEY_WF_COPILOT_TICKER,    v).apply() }
+
+    fun getWatchFaceUvZoneArc(): Boolean       = prefs.getBoolean(KEY_WF_UV_ZONE_ARC,       false)
+    fun setWatchFaceUvZoneArc(v: Boolean)      { prefs.edit().putBoolean(KEY_WF_UV_ZONE_ARC,       v).apply() }
+
+    fun getWatchFaceRecoveryScore(): Boolean   = prefs.getBoolean(KEY_WF_RECOVERY_SCORE,    false)
+    fun setWatchFaceRecoveryScore(v: Boolean)  { prefs.edit().putBoolean(KEY_WF_RECOVERY_SCORE,    v).apply() }
+
+    fun getWatchFaceFocusCountdown(): Boolean  = prefs.getBoolean(KEY_WF_FOCUS_COUNTDOWN,   false)
+    fun setWatchFaceFocusCountdown(v: Boolean) { prefs.edit().putBoolean(KEY_WF_FOCUS_COUNTDOWN,   v).apply() }
+
     companion object {
         private const val PREFS_NAME = "unlockedwear_prefs"
         private const val KEY_DEEPSEEK_API_KEY = "deepseek_api_key"
@@ -137,5 +163,14 @@ class AppPreferences @Inject constructor(
         private const val KEY_WF_TOP_COMPLICATION    = "wf_top_complication"
         private const val KEY_WF_BOTTOM_COMPLICATION = "wf_bottom_complication"
         private const val KEY_WF_DIAL_STYLE          = "wf_dial_style"
+        // Feature flags
+        private const val KEY_WF_BIO_REACTIVE_ARC   = "wf_bio_reactive_arc"
+        private const val KEY_WF_HRV_BAND            = "wf_hrv_band"
+        private const val KEY_WF_CIRCADIAN_SECTOR    = "wf_circadian_sector"
+        private const val KEY_WF_THERMAL_STRIP       = "wf_thermal_strip"
+        private const val KEY_WF_COPILOT_TICKER      = "wf_copilot_ticker"
+        private const val KEY_WF_UV_ZONE_ARC         = "wf_uv_zone_arc"
+        private const val KEY_WF_RECOVERY_SCORE      = "wf_recovery_score"
+        private const val KEY_WF_FOCUS_COUNTDOWN     = "wf_focus_countdown"
     }
 }
