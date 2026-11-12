@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Application / Watch Face Name -->
+    <string name="watchface_name">UnlockedWear Mission Control</string>
+
+    <!-- Complication Slot Display Names -->
+    <string name="complication_mission_ring">Mission Ring (Adaptive Telemetry)</string>
+    <string name="complication_copilot">Co-Pilot Priority Headline</string>
+    <string name="complication_heart_rate">Heart Rate Telemetry</string>
+    <string name="complication_temperature">Skin Temperature Delta</string>
+    <string name="complication_spo2">SpO2 / Blood Oxygen</string>
+    <string name="complication_battery">Power Subsystem</string>
+    <string name="complication_steps">Daily Steps Goal</string>
+    <string name="complication_weather">Atmospheric Weather</string>
+    <string name="complication_date">Date &amp; Schedule</string>
+
+    <!-- User Style Settings -->
+    <string name="space_bg_label">Space Horizon Wallpaper</string>
+    <string name="bg_sunrise_name">Orbital Sunrise (Earth)</string>
+    <string name="bg_earth_orbit_name">Earthrise Orbit</string>
+    <string name="bg_mars_mission_name">Mars Deep Space</string>
+    <string name="bg_lunar_moon_name">Lunar Terminator</string>
+    <string name="bg_deep_terrain_name">Orbital Surface</string>
+    <string name="bg_stealth_amoled_name">Stealth AMOLED Black</string>
+
+    <string name="theme_color_label">Accent Color Theme</string>
+    <string name="theme_cyber_cyan">Cyber Cyan</string>
+    <string name="theme_solar_flare">Solar Orange</string>
+    <string name="theme_orbit_green">Orbit Green</string>
+    <string name="theme_stealth_mono">Stealth Mono</string>
+
+    <string name="show_seconds_label">Seconds Telemetry</string>
+    <string name="show_bezel_label">Technical Bezel Ticks</string>
+
+    <!-- Telemetry Badges -->
+    <string name="badge_mission_control">MISSION CTRL</string>
+    <string name="badge_active">ACTIVE</string>
+    <string name="badge_orbit">ORBIT // 450</string>
+    <string name="copilot_title">AI Co-Pilot</string>
+    <string name="schedule_label">Next: GATE Prep • 06:30 – 08:00</string>
+</resources>

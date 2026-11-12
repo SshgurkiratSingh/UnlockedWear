@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="450dp"
+    android:height="450dp"
+    android:viewportWidth="450"
+    android:viewportHeight="450">
+
+    <!-- Screen Base (Deep Space Black) -->
+    <path
+        android:fillColor="#0A0A0F"
+        android:pathData="M225,225m-225,0a225,225 0 1,1 450,0a225,225 0 1,1 -450,0" />
+
+    <!-- Aerospace Reticle Grid & Dial Circles -->
+    <path
+        android:strokeColor="#15202E"
+        android:strokeWidth="1"
+        android:pathData="M225,225m-218,0a218,218 0 1,1 436,0a218,218 0 1,1 -436,0" />
+    <path
+        android:strokeColor="#121D2B"
+        android:strokeWidth="1"
+        android:pathData="M225,225m-180,0a180,180 0 1,1 360,0a180,180 0 1,1 -360,0" />
+    <path
+        android:strokeColor="#101824"
+        android:strokeWidth="1"
+        android:pathData="M225,225m-125,0a125,125 0 1,1 250,0a125,125 0 1,1 -250,0" />
+
+    <!-- Cardinal Ticks (0, 90, 180, 270) -->
+    <path
+        android:strokeColor="#00D4FF"
+        android:strokeWidth="2"
+        android:pathData="M225,7 L225,21 M225,429 L225,443 M7,225 L21,225 M429,225 L443,225" />
+
+    <!-- Sub-cardinal Ticks (45, 135, 225, 315) -->
+    <path
+        android:strokeColor="#1F354D"
+        android:strokeWidth="1.5"
+        android:pathData="M71,71 L81,81 M379,71 L369,81 M71,379 L81,369 M379,379 L369,369" />
+
+    <!-- Adaptive Mission Ring (Outer 360 Track) -->
+    <path
+        android:strokeColor="#1A00D4FF"
+        android:strokeWidth="6"
+        android:pathData="M225,225m-218,0a218,218 0 1,1 436,0a218,218 0 1,1 -436,0" />
+
+    <!-- Active Mission Arc (270-degree UV / Battery / Mission Metric Arc) -->
+    <path
+        android:strokeColor="#00D4FF"
+        android:strokeWidth="6"
+        android:strokeLineCap="round"
+        android:pathData="M225,7 A218,218 0 1,1 7,225" />
+
+    <!-- Top Complication Pod: Co-Pilot Headline Frame -->
+    <path
+        android:fillColor="#80121622"
+        android:strokeColor="#2A00D4FF"
+        android:strokeWidth="1"
+        android:pathData="M115,55 h220 a10,10 0 0,1 10,10 v35 a10,10 0 0,1 -10,10 h-220 a10,10 0 0,1 -10,-10 v-35 a10,10 0 0,1 10,-10 z" />
+
+    <!-- Co-Pilot Corner Accents -->
+    <path
+        android:strokeColor="#00D4FF"
+        android:strokeWidth="1.5"
+        android:pathData="M105,63 L105,55 L113,55 M337,55 L345,55 L345,63 M105,102 L105,110 L113,110 M337,110 L345,110 L345,102" />
+
+    <!-- Left Pod: Heart Rate Dial Frame -->
+    <path
+        android:fillColor="#80121622"
+        android:strokeColor="#2A00D4FF"
+        android:strokeWidth="1"
+        android:pathData="M75,285m-42,0a42,42 0 1,1 84,0a42,42 0 1,1 -84,0" />
+    <path
+        android:strokeColor="#FF6B35"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M75,245 A40,40 0 0,1 113,275" />
+
+    <!-- Right Pod: Temperature Dial Frame -->
+    <path
+        android:fillColor="#80121622"
+        android:strokeColor="#2A00D4FF"
+        android:strokeWidth="1"
+        android:pathData="M375,285m-42,0a42,42 0 1,1 84,0a42,42 0 1,1 -84,0" />
+    <path
+        android:strokeColor="#00D4FF"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M375,245 A40,40 0 0,0 337,275" />
+
+    <!-- Bottom-Left Pod: SpO2 / Activity Frame -->
+    <path
+        android:fillColor="#80121622"
+        android:strokeColor="#2A00D4FF"
+        android:strokeWidth="1"
+        android:pathData="M107,325 h71 a10,10 0 0,1 10,10 v50 a10,10 0 0,1 -10,10 h-71 a10,10 0 0,1 -10,-10 v-50 a10,10 0 0,1 10,-10 z" />
+    <path
+        android:strokeColor="#4CAF50"
+        android:strokeWidth="2"
+        android:pathData="M97,333 L97,325 L105,325" />
+
+    <!-- Bottom-Right Pod: Battery Frame -->
+    <path
+        android:fillColor="#80121622"
+        android:strokeColor="#2A00D4FF"
+        android:strokeWidth="1"
+        android:pathData="M272,325 h71 a10,10 0 0,1 10,10 v50 a10,10 0 0,1 -10,10 h-71 a10,10 0 0,1 -10,-10 v-50 a10,10 0 0,1 10,-10 z" />
+    <path
+        android:strokeColor="#00D4FF"
+        android:strokeWidth="2"
+        android:pathData="M343,325 L353,325 L353,333" />
+
+    <!-- Center HUD Divider Bar -->
+    <path
+        android:strokeColor="#2500D4FF"
+        android:strokeWidth="1"
+        android:pathData="M160,198 L290,198" />
+
+    <!-- Center Decorative Calibrations -->
+    <path
+        android:strokeColor="#00D4FF"
+        android:strokeWidth="2"
+        android:pathData="M223,198 L227,198" />
+
+</vector>

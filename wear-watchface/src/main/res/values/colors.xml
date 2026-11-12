@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- UnlockedWear Aerospace Mission Control Color Palette -->
+    <!-- Primary Base -->
+    <color name="space_black">#0A0A0F</color>
+    <color name="space_black_true">#000000</color>
+    <color name="panel_bg">#121622</color>
+    <color name="panel_bg_translucent">#99121622</color>
+    <color name="panel_border">#2A00D4FF</color>
+
+    <!-- Primary Accent -->
+    <color name="cyber_cyan">#00D4FF</color>
+    <color name="cyber_cyan_dim">#1A00D4FF</color>
+    <color name="cyber_cyan_glow">#4D00D4FF</color>
+
+    <!-- Secondary Accent: Warning / Alerts -->
+    <color name="warning_orange">#FF6B35</color>
+    <color name="warning_orange_dim">#26FF6B35</color>
+
+    <!-- Tertiary Accent: Positive / Nominal -->
+    <color name="positive_green">#4CAF50</color>
+    <color name="positive_green_dim">#264CAF50</color>
+
+    <!-- Telemetry & Typography -->
+    <color name="text_bright">#FFFFFF</color>
+    <color name="text_dim">#8A99A8</color>
+    <color name="text_muted">#4A5568</color>
+    <color name="grid_line">#15202E</color>
+
+    <!-- Ambient Mode Low-Power Palette -->
+    <color name="ambient_white">#FFFFFF</color>
+    <color name="ambient_dim">#44FFFFFF</color>
+    <color name="ambient_faint">#22FFFFFF</color>
+</resources>

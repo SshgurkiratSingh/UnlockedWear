@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">UnlockedWear Core</string>
+    <string name="tile_name">UnlockedWear Health Tile</string>
+    <string name="tile_description">Displays real-time Samsung BioActive sensor statistics</string>
+    <string name="complication_name">UnlockedWear Sensor Complication</string>
+    <string name="mission_ring_complication_name">Mission Ring Gauge</string>
+    <string name="copilot_complication_name">DeepSeek Co-Pilot</string>
+    <string name="thermal_complication_name">Thermal Delta</string>
+</resources>

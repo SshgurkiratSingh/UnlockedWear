@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Wear OS Hardware Requirement -->
+    <uses-feature android:name="android.hardware.type.watch" />
+
+    <!-- Samsung Health Sensor SDK & Standard Health Permissions -->
+    <!-- BODY_SENSORS for SDK < API 36 -->
+    <uses-permission android:name="android.permission.BODY_SENSORS" />
+    <uses-permission android:name="android.permission.BODY_SENSORS_BACKGROUND" />
+
+    <!-- Fine-grained Health permissions (API 36+) -->
+    <uses-permission android:name="android.permission.health.READ_SKIN_TEMPERATURE" />
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
+
+    <!-- Activity and High-Frequency Sensor Permissions -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- Foreground Services for Continuous Sensor Tracking & Synchronization -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application
+        android:name=".UnlockedWearApp"
+        android:allowBackup="true"
+        android:icon="@android:drawable/sym_def_app_icon"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.UnlockedWear">
+
+        <!-- Standalone Wear OS Application -->
+        <meta-data
+            android:name="com.google.android.wearable.standalone"
+            android:value="true" />
+
+        <!-- Samsung Health Sensor SDK Partnership & Privileged Access Metadata -->
+        <!-- Note: Continuous PPG/ECG/raw sensor streams require an approved Samsung Developer Partner -->
+        <!-- certificate signature in production, or Developer Mode enabled on the watch during debugging -->
+        <meta-data
+            android:name="com.samsung.android.health.permission.TRACKER_ACCESS"
+            android:value="true" />
+        <meta-data
+            android:name="com.samsung.android.health.sdk.tracking_partner"
+            android:value="partner_application_key_or_developer_mode" />
+
+        <!-- Main Watch Activity -->
+        <activity
+            android:name=".ui.MainWearActivity"
+            android:exported="true"
+            android:theme="@style/Theme.UnlockedWear">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".presentation.MainActivity"
+            android:exported="false"
+            android:theme="@style/Theme.UnlockedWear" />
+
+        <!-- Complication Tap Trampoline Activities -->
+        <activity
+            android:name=".ui.MissionRingSelectorActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <activity
+            android:name=".ui.CoPilotActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <activity
+            android:name=".ui.ThermalDetailActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <!-- Google Play Services Wearable Data Layer Listener Service (DataSyncService) -->
+        <service
+            android:name=".data.DataSyncService"
+            android:exported="true"
+            android:permission="com.google.android.gms.wearable.BIND_LISTENER">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <action android:name="com.google.android.gms.wearable.CAPABILITY_CHANGED" />
+                <action android:name="com.google.android.gms.wearable.CHANNEL_EVENT" />
+                <data
+                    android:host="*"
+                    android:pathPrefix="/"
+                    android:scheme="wear" />
+            </intent-filter>
+        </service>
+
+        <!-- Google Play Services Wearable Data Layer Listener Service (WearDataListenerService) -->
+        <service
+            android:name=".service.WearDataListenerService"
+            android:exported="true"
+            android:permission="com.google.android.gms.wearable.BIND_LISTENER">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <action android:name="com.google.android.gms.wearable.CAPABILITY_CHANGED" />
+                <action android:name="com.google.android.gms.wearable.CHANNEL_EVENT" />
+                <data
+                    android:host="*"
+                    android:pathPrefix="/"
+                    android:scheme="wear" />
+            </intent-filter>
+        </service>
+
+        <!-- Wear OS Tiles Service -->
+        <service
+            android:name=".tiles.MissionRingTileService"
+            android:description="@string/tile_description"
+            android:exported="true"
+            android:label="@string/tile_name"
+            android:permission="com.google.android.wearable.permission.BIND_TILE_PROVIDER">
+            <intent-filter>
+                <action android:name="androidx.wear.tiles.action.BIND_UPDATE_REQUESTER" />
+            </intent-filter>
+        </service>
+
+        <!-- Wear OS Complications: Mission Ring Ranged Value -->
+        <service
+            android:name=".complications.MissionRingComplicationService"
+            android:exported="true"
+            android:icon="@android:drawable/ic_dialog_info"
+            android:label="@string/mission_ring_complication_name"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="androidx.wear.watchface.complications.datasource.action.ComplicationDataSourceService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="RANGED_VALUE" />
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="120" />
+        </service>
+
+        <!-- Wear OS Complications: DeepSeek Co-Pilot Long Text -->
+        <service
+            android:name=".complications.CoPilotComplicationService"
+            android:exported="true"
+            android:icon="@android:drawable/ic_dialog_info"
+            android:label="@string/copilot_complication_name"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="androidx.wear.watchface.complications.datasource.action.ComplicationDataSourceService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="LONG_TEXT" />
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="300" />
+        </service>
+
+        <!-- Wear OS Complications: Thermal Delta Short Text -->
+        <service
+            android:name=".complications.ThermalComplicationService"
+            android:exported="true"
+            android:icon="@android:drawable/ic_dialog_info"
+            android:label="@string/thermal_complication_name"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="androidx.wear.watchface.complications.datasource.action.ComplicationDataSourceService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="SHORT_TEXT" />
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="60" />
+        </service>
+
+    </application>
+
+</manifest>
