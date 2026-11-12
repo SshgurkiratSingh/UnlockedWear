@@ -96,6 +96,12 @@
             </intent-filter>
         </service>
 
+        <!-- Continuous sensor streaming foreground service -->
+        <service
+            android:name=".service.SensorForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="health" />
+
         <!-- Google Play Services Wearable Data Layer Listener Service (WearDataListenerService) -->
         <service
             android:name=".service.WearDataListenerService"

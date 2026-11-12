@@ -17,6 +17,7 @@ import com.unlockedwear.protocol.DailyBriefing
 import com.unlockedwear.protocol.RingMode
 import com.unlockedwear.protocol.RingState
 import com.unlockedwear.protocol.ThermalFrame
+import com.unlockedwear.protocol.WatchFaceFeatureFlags
 import com.unlockedwear.protocol.WeatherState
 import com.unlockedwear.wear.complications.CoPilotComplicationService
 import com.unlockedwear.wear.complications.MissionRingComplicationService
@@ -28,6 +29,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -73,8 +75,14 @@ class DataSyncService : WearableListenerService() {
 
         /**
          * Dispatches thermal telemetry frame to phone via Data Layer API.
+         * Includes delta-from-baseline and z-score computed by [UnlockedThermalManager].
          */
-        suspend fun dispatchThermalFrame(context: Context, frame: ThermalFrame) {
+        suspend fun dispatchThermalFrame(
+            context: Context,
+            frame: ThermalFrame,
+            deltaFromBaseline: Float = 0f,
+            zScore: Float = 0f
+        ) {
             try {
                 val request = PutDataMapRequest.create(DataLayerPaths.SENSOR_THERMAL).apply {
                     dataMap.putLong("timestampMs", frame.timestampMs)
@@ -82,6 +90,10 @@ class DataSyncService : WearableListenerService() {
                     dataMap.putFloat("ambientTempCelsius", frame.ambientTempCelsius)
                     dataMap.putFloat("compensatedTempCelsius", frame.compensatedTempCelsius)
                     dataMap.putInt("status", frame.status)
+                    dataMap.putFloat("deltaFromBaseline", deltaFromBaseline)
+                    dataMap.putFloat("zScore", zScore)
+                    // Force DataItem to be re-sent even if values haven't changed
+                    dataMap.putLong("_ts", System.currentTimeMillis())
                 }.asPutDataRequest().setUrgent()
 
                 Wearable.getDataClient(context).putDataItem(request).await()
@@ -215,14 +227,33 @@ class DataSyncService : WearableListenerService() {
                 }
             }
 
-            DataLayerPaths.COMMAND_READ_TEMP -> {
+            DataLayerPaths.CONFIG_SYNC_FEATURES -> {
                 serviceScope.launch {
                     try {
+                        val flags = json.decodeFromString<WatchFaceFeatureFlags>(String(data, Charsets.UTF_8))
+                        watchFaceConfigDataStore.applyFeatureFlags(flags)
+                        Log.i(TAG, "Feature flags applied: bioReactive=${flags.bioReactiveArc} hrv=${flags.hrvBand} thermal=${flags.thermalStrip}")
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error applying CONFIG_SYNC_FEATURES message", e)
+                    }
+                }
+            }
+
+            DataLayerPaths.COMMAND_READ_TEMP -> {                serviceScope.launch {
+                    try {
                         Log.i(TAG, "Received on-demand temperature measurement command from mobile")
-                        // Trigger thermal sensor sweep
-                        thermalManager.streamSkinTemperature(onDemand = true).collect { frame ->
-                            dispatchThermalFrame(applicationContext, frame)
-                        }
+                        thermalManager.streamSkinTemperature(onDemand = true)
+                            .take(5)
+                            .collect { frame ->
+                                val delta  = frame.compensatedTempCelsius - thermalManager.getBaselineTemperature()
+                                val zScore = thermalManager.getCurrentZScore()
+                                dispatchThermalFrame(
+                                    context           = applicationContext,
+                                    frame             = frame,
+                                    deltaFromBaseline = delta,
+                                    zScore            = zScore
+                                )
+                            }
                     } catch (e: Exception) {
                         Log.e(TAG, "Error handling COMMAND_READ_TEMP", e)
                     }
@@ -304,6 +335,34 @@ class DataSyncService : WearableListenerService() {
                             Log.i(TAG, "Watch face config applied via DataItem: ringMode=$ringMode accentColor=$accentColorHex")
                         } catch (e: Exception) {
                             Log.e(TAG, "Error applying CONFIG_SYNC DataItem", e)
+                        }
+                    }
+                } else if (path == DataLayerPaths.CONFIG_SYNC_FEATURES) {
+                    val dataMapItem = DataMapItem.fromDataItem(event.dataItem)
+                    val map = dataMapItem.dataMap
+                    serviceScope.launch {
+                        try {
+                            val jsonStr = map.getString("json", null)
+                            if (jsonStr != null) {
+                                val flags = json.decodeFromString<WatchFaceFeatureFlags>(jsonStr)
+                                watchFaceConfigDataStore.applyFeatureFlags(flags)
+                            } else {
+                                watchFaceConfigDataStore.applyFeatureFlags(
+                                    WatchFaceFeatureFlags(
+                                        bioReactiveArc  = map.getBoolean("bioReactiveArc",  true),
+                                        hrvBand         = map.getBoolean("hrvBand",          true),
+                                        circadianSector = map.getBoolean("circadianSector",  false),
+                                        thermalStrip    = map.getBoolean("thermalStrip",     true),
+                                        coPilotTicker   = map.getBoolean("coPilotTicker",    true),
+                                        uvZoneArc       = map.getBoolean("uvZoneArc",        false),
+                                        recoveryScore   = map.getBoolean("recoveryScore",    false),
+                                        focusCountdown  = map.getBoolean("focusCountdown",   false)
+                                    )
+                                )
+                            }
+                            Log.i(TAG, "Feature flags applied via DataItem")
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error applying CONFIG_SYNC_FEATURES DataItem", e)
                         }
                     }
                 }

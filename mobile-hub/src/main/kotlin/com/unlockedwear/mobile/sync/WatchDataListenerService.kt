@@ -48,21 +48,23 @@ class WatchDataListenerService : WearableListenerService() {
 
                 when (path) {
                     DataLayerPaths.SENSOR_THERMAL -> {
-                        val skinTemp = dataMap.getFloat("skinTempCelsius", 33.5f)
-                        val ambientTemp = dataMap.getFloat("ambientTempCelsius", 24.0f)
+                        val skinTemp        = dataMap.getFloat("skinTempCelsius", 33.5f)
+                        val ambientTemp     = dataMap.getFloat("ambientTempCelsius", 24.0f)
                         val compensatedTemp = dataMap.getFloat("compensatedTempCelsius", skinTemp)
-                        val timestampMs = dataMap.getLong("timestampMs", System.currentTimeMillis())
-                        val status = dataMap.getInt("status", 1)
+                        val timestampMs     = dataMap.getLong("timestampMs", System.currentTimeMillis())
+                        val status          = dataMap.getInt("status", 1)
+                        val delta           = dataMap.getFloat("deltaFromBaseline", 0f)
+                        val zScore          = dataMap.getFloat("zScore", 0f)
 
                         val frame = ThermalFrame(
-                            skinTempCelsius = skinTemp,
-                            ambientTempCelsius = ambientTemp,
+                            skinTempCelsius       = skinTemp,
+                            ambientTempCelsius    = ambientTemp,
                             compensatedTempCelsius = compensatedTemp,
-                            timestampMs = timestampMs,
-                            status = status
+                            timestampMs           = timestampMs,
+                            status                = status
                         )
                         serviceScope.launch {
-                            sensorRepository.insertThermalReading(frame)
+                            sensorRepository.insertThermalReading(frame, delta, zScore.toDouble())
                         }
                     }
 
@@ -102,7 +104,9 @@ class WatchDataListenerService : WearableListenerService() {
                 when (path) {
                     DataLayerPaths.SENSOR_THERMAL -> {
                         val frame = json.decodeFromString<ThermalFrame>(String(payload, Charsets.UTF_8))
-                        sensorRepository.insertThermalReading(frame)
+                        // Message path carries full JSON — delta & zScore are computed on watch
+                        // but not in ThermalFrame; fall back to 0 (DataItem path is preferred).
+                        sensorRepository.insertThermalReading(frame, 0f, 0.0)
                     }
 
                     DataLayerPaths.SENSOR_BIOMETRIC -> {

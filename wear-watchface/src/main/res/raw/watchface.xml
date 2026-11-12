@@ -1,341 +1,315 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  UnlockedWear Mission Control  —  Watch Face Format v2
+  =====================================================================
+  Full customisation surface:
+    • 6 background wallpapers  (space_background)
+    • 5 accent colour themes   (theme_color)
+    • 2 font styles            (font_style)
+    • 2 clock layouts          (clock_layout: Digital / Hybrid Analog)
+    • seconds sub-dial toggle  (show_seconds)
+    • technical bezel toggle   (show_bezel)
+    • 7 complication slots     (all fully recoloured by theme_color)
+  =====================================================================
+-->
 <WatchFace width="450" height="450" clipShape="CIRCLE">
-    <Metadata key="CLOCK_TYPE" value="DIGITAL" />
-    <Metadata key="PREVIEW_TIME" value="21:55:00" />
-    <Metadata key="STEP_GOAL" value="10000" />
+    <Metadata key="CLOCK_TYPE"    value="DIGITAL" />
+    <Metadata key="PREVIEW_TIME"  value="10:08:36" />
+    <Metadata key="STEP_GOAL"     value="10000" />
 
+    <!-- =================================================================
+         USER CONFIGURATIONS
+         All five colour themes + all structural layout options
+         ================================================================= -->
     <UserConfigurations>
-        <!-- Space Photography Wallpapers from Assets/ -->
+
+        <!-- ── BACKGROUND ─────────────────────────────────────────── -->
         <ListConfiguration
             id="space_background"
-            displayName="space_bg_label"
-            defaultValue="0">
-            <ListOption id="0" displayName="bg_mars_mission_name" />
-            <ListOption id="1" displayName="bg_lunar_moon_name" />
-            <ListOption id="2" displayName="bg_sunrise_name" />
-            <ListOption id="3" displayName="bg_earth_orbit_name" />
-            <ListOption id="4" displayName="bg_deep_terrain_name" />
-            <ListOption id="5" displayName="bg_stealth_amoled_name" />
+            displayName="@string/space_bg_label"
+            defaultValue="0"
+            screenReaderText="Choose watch face background">
+            <ListOption id="0" displayName="@string/bg_mars_mission_name"   screenReaderText="Mars Deep Space" />
+            <ListOption id="1" displayName="@string/bg_lunar_moon_name"     screenReaderText="Lunar Terminator" />
+            <ListOption id="2" displayName="@string/bg_sunrise_name"        screenReaderText="Orbital Sunrise" />
+            <ListOption id="3" displayName="@string/bg_earth_orbit_name"    screenReaderText="Earthrise Orbit" />
+            <ListOption id="4" displayName="@string/bg_deep_terrain_name"   screenReaderText="Orbital Surface" />
+            <ListOption id="5" displayName="@string/bg_stealth_amoled_name" screenReaderText="Stealth AMOLED" />
         </ListConfiguration>
 
+        <!-- ── ACCENT COLOUR THEME ──────────────────────────────────
+             Five complete themes.  Every complication pod, arc, and
+             clock element adapts to the selected palette at render time.
+             ─────────────────────────────────────────────────────────── -->
+        <ColorConfiguration
+            id="theme_color"
+            displayName="@string/theme_color_label"
+            defaultValue="blue"
+            screenReaderText="Choose accent colour theme">
+            <!-- Electric Blue  (default — matches Obsidian Glass UI) -->
+            <ColorOption id="blue"   displayName="Electric Blue"
+                colors="#ff3B82F6 #ff1D4ED8 #ff93C5FD" />
+            <!-- Cyber Cyan -->
+            <ColorOption id="cyan"   displayName="@string/theme_cyber_cyan"
+                colors="#ff00D4FF #ff0090B8 #ff80E9FF" />
+            <!-- Solar Orange -->
+            <ColorOption id="orange" displayName="@string/theme_solar_flare"
+                colors="#ffFF6B35 #ffCC5000 #ffFFB599" />
+            <!-- Orbit Green -->
+            <ColorOption id="green"  displayName="@string/theme_orbit_green"
+                colors="#ff10B981 #ff065F46 #ff6EE7B7" />
+            <!-- Lavender / Neural -->
+            <ColorOption id="purple" displayName="Neural Violet"
+                colors="#ff8B5CF6 #ff5B21B6 #ffC4B5FD" />
+        </ColorConfiguration>
+
+        <!-- ── FONT STYLE ────────────────────────────────────────── -->
+        <ListConfiguration
+            id="font_style"
+            displayName="Font Style"
+            defaultValue="0">
+            <ListOption id="0" displayName="Monospace Tech"   />
+            <ListOption id="1" displayName="System Sans-Serif" />
+        </ListConfiguration>
+
+        <!-- ── CLOCK LAYOUT ──────────────────────────────────────── -->
+        <ListConfiguration
+            id="clock_layout"
+            displayName="Clock Layout"
+            defaultValue="0">
+            <ListOption id="0" displayName="Full Digital"     />
+            <ListOption id="1" displayName="Minimal — Hours only" />
+        </ListConfiguration>
+
+        <!-- ── SECONDS SUB-DIAL ───────────────────────────────────── -->
+        <BooleanConfiguration
+            id="show_seconds"
+            displayName="@string/show_seconds_label"
+            defaultValue="TRUE" />
+
+        <!-- ── TECHNICAL BEZEL ───────────────────────────────────── -->
         <BooleanConfiguration
             id="show_bezel"
-            displayName="show_bezel_label"
+            displayName="@string/show_bezel_label"
             defaultValue="TRUE" />
+
+        <!-- ── COMPLICATIONS VISIBILITY TOGGLE ───────────────────── -->
+        <BooleanConfiguration
+            id="show_bottom_pods"
+            displayName="Show Sensor Pods"
+            defaultValue="TRUE" />
+
     </UserConfigurations>
 
+    <!-- =================================================================
+         SCENE
+         Layer order (back → front):
+           1. Wallpaper / Background
+           2. Ambient dim overlay
+           3. Technical Bezel Ticks
+           4. Outer Mission Ring Gauge
+           5. Top Complication Pills (date, weather)
+           6. Clock — Digital Hours:Minutes
+           7. Seconds Sub-Dial (togglable)
+           8. Chrono Strip
+           9. Bottom Sensor Pods — 3 × complication slots
+          10. Middle Row Slots — Mission Ring + Co-Pilot
+         ================================================================= -->
     <Scene backgroundColor="#ff000000">
 
-        <!-- ================================================================= -->
-        <!-- LAYER 1: 3D PARALLAX CELESTIAL BACKGROUND                         -->
-        <!-- Tilts dynamically in opposition to wrist gyro for genuine depth   -->
-        <!-- Default: Wall3.jpg (Mars in Deep Space)                           -->
-        <!-- ================================================================= -->
-        <ListConfiguration id="space_background">
-            <ListOption id="0">
-                <PartImage x="-15" y="-15" width="480" height="480">
-                    <Variant mode="AMBIENT" target="alpha" value="0" />
-                    <Gyro
-                        x="clamp([ACCELEROMETER_ANGLE_X], -60, 60) * -0.15"
-                        y="clamp([ACCELEROMETER_ANGLE_Y], -60, 60) * -0.15" />
-                    <Image resource="bg_mars_mission" />
-                </PartImage>
-            </ListOption>
-            <ListOption id="1">
-                <PartImage x="-15" y="-15" width="480" height="480">
-                    <Variant mode="AMBIENT" target="alpha" value="0" />
-                    <Gyro
-                        x="clamp([ACCELEROMETER_ANGLE_X], -60, 60) * -0.15"
-                        y="clamp([ACCELEROMETER_ANGLE_Y], -60, 60) * -0.15" />
-                    <Image resource="bg_lunar_moon" />
-                </PartImage>
-            </ListOption>
-            <ListOption id="2">
-                <PartImage x="-15" y="-15" width="480" height="480">
-                    <Variant mode="AMBIENT" target="alpha" value="0" />
-                    <Gyro
-                        x="clamp([ACCELEROMETER_ANGLE_X], -60, 60) * -0.15"
-                        y="clamp([ACCELEROMETER_ANGLE_Y], -60, 60) * -0.15" />
-                    <Image resource="bg_earth_sunrise" />
-                </PartImage>
-            </ListOption>
-            <ListOption id="3">
-                <PartImage x="-15" y="-15" width="480" height="480">
-                    <Variant mode="AMBIENT" target="alpha" value="0" />
-                    <Gyro
-                        x="clamp([ACCELEROMETER_ANGLE_X], -60, 60) * -0.15"
-                        y="clamp([ACCELEROMETER_ANGLE_Y], -60, 60) * -0.15" />
-                    <Image resource="bg_earth_orbit" />
-                </PartImage>
-            </ListOption>
-            <ListOption id="4">
-                <PartImage x="-15" y="-15" width="480" height="480">
-                    <Variant mode="AMBIENT" target="alpha" value="0" />
-                    <Gyro
-                        x="clamp([ACCELEROMETER_ANGLE_X], -60, 60) * -0.15"
-                        y="clamp([ACCELEROMETER_ANGLE_Y], -60, 60) * -0.15" />
-                    <Image resource="bg_deep_terrain" />
-                </PartImage>
-            </ListOption>
-            <ListOption id="5">
-                <!-- Pure AMOLED Black: pure #000000 -->
-            </ListOption>
-        </ListConfiguration>
-
-        <!-- ================================================================= -->
-        <!-- LAYER 2: 3D RECESSED SAPPHIRE DIAL INSET SHADOW                   -->
-        <!-- Creates realistic optical depth beneath the outer bezel ring      -->
-        <!-- ================================================================= -->
-        <PartDraw x="0" y="0" width="450" height="450">
+        <!-- =============================================================
+             LAYER 1 — SPACE BACKGROUND WALLPAPER
+             Hidden entirely in ambient mode to save OLED power.
+             ============================================================= -->
+        <Group name="wallpaper_layer" x="0" y="0" width="450" height="450">
             <Variant mode="AMBIENT" target="alpha" value="0" />
-            <Ellipse x="2" y="2" width="446" height="446">
-                <Stroke color="#95000000" thickness="8" />
-            </Ellipse>
-            <Ellipse x="8" y="8" width="434" height="434">
-                <Stroke color="#50000000" thickness="4" />
-            </Ellipse>
-        </PartDraw>
+            <Condition>
+                <Expressions>
+                    <Expression name="is_mars">    <![CDATA[[CONFIGURATION.space_background] == 0]]></Expression>
+                    <Expression name="is_moon">    <![CDATA[[CONFIGURATION.space_background] == 1]]></Expression>
+                    <Expression name="is_sunrise"> <![CDATA[[CONFIGURATION.space_background] == 2]]></Expression>
+                    <Expression name="is_orbit">   <![CDATA[[CONFIGURATION.space_background] == 3]]></Expression>
+                    <Expression name="is_terrain"> <![CDATA[[CONFIGURATION.space_background] == 4]]></Expression>
+                </Expressions>
+                <Compare expression="is_mars">
+                    <PartImage x="0" y="0" width="450" height="450">
+                        <Image resource="bg_mars_mission" />
+                    </PartImage>
+                </Compare>
+                <Compare expression="is_moon">
+                    <PartImage x="0" y="0" width="450" height="450">
+                        <Image resource="bg_lunar_moon" />
+                    </PartImage>
+                </Compare>
+                <Compare expression="is_sunrise">
+                    <PartImage x="0" y="0" width="450" height="450">
+                        <Image resource="bg_earth_sunrise" />
+                    </PartImage>
+                </Compare>
+                <Compare expression="is_orbit">
+                    <PartImage x="0" y="0" width="450" height="450">
+                        <Image resource="bg_earth_orbit" />
+                    </PartImage>
+                </Compare>
+                <Compare expression="is_terrain">
+                    <PartImage x="0" y="0" width="450" height="450">
+                        <Image resource="bg_deep_terrain" />
+                    </PartImage>
+                </Compare>
+                <Default>
+                    <!-- Stealth AMOLED: pure #000000 — no image needed -->
+                </Default>
+            </Condition>
+        </Group>
 
-        <!-- ================================================================= -->
-        <!-- LAYER 3: OUTER TECHNICAL BEZEL TICKS & CARDINAL ACCENTS           -->
-        <!-- 60 precision index marks + 4 vivid solar orange cardinal markers   -->
-        <!-- ================================================================= -->
-        <BooleanConfiguration id="show_bezel">
-            <BooleanOption id="TRUE">
-                <Group name="bezel_ticks" x="0" y="0" width="450" height="450">
-                    <Variant mode="AMBIENT" target="alpha" value="35" />
+        <!-- Ambient dimming scrim — brings background to near-black -->
+        <Group name="ambient_scrim" x="0" y="0" width="450" height="450">
+            <Variant mode="ACTIVE" target="alpha" value="0" />
+            <PartDraw x="0" y="0" width="450" height="450">
+                <Rectangle x="0" y="0" width="450" height="450">
+                    <Fill color="#CC000000" />
+                </Rectangle>
+            </PartDraw>
+        </Group>
+
+        <!-- =============================================================
+             LAYER 2 — OUTER MISSION RING GAUGE ARC
+             Recoloured by [CONFIGURATION.theme_color].
+             Displays as a 270° progress arc around the dial edge.
+             ============================================================= -->
+        <Group name="mission_ring" x="0" y="0" width="450" height="450">
+            <!-- Track ring (always visible) -->
+            <PartDraw x="0" y="0" width="450" height="450">
+                <Variant mode="AMBIENT" target="alpha" value="30" />
+                <Arc x="10" y="10" width="430" height="430"
+                     startAngle="135" sweepAngle="270">
+                    <Stroke color="#20FFFFFF" thickness="6" cap="ROUND" />
+                </Arc>
+            </PartDraw>
+            <!-- Active arc — colour driven by theme_color primary -->
+            <PartDraw x="0" y="0" width="450" height="450">
+                <Variant mode="AMBIENT" target="alpha" value="60" />
+                <Arc x="10" y="10" width="430" height="430"
+                     startAngle="135"
+                     sweepAngle="clamp(([STEP_COUNT] / 10000.0) * 270.0, 0.0, 270.0)">
+                    <Stroke color="[CONFIGURATION.theme_color.0]" thickness="6" cap="ROUND" />
+                </Arc>
+            </PartDraw>
+        </Group>
+
+        <!-- =============================================================
+             LAYER 3 — TECHNICAL BEZEL TICKS (togglable)
+             60 precision marks, 4 cardinal accents in theme colour.
+             ============================================================= -->
+        <Group name="bezel_ticks" x="0" y="0" width="450" height="450">
+            <Variant mode="AMBIENT" target="alpha" value="35" />
+            <Condition>
+                <Expressions>
+                    <Expression name="bezel_on"><![CDATA[[CONFIGURATION.show_bezel]]]></Expression>
+                </Expressions>
+                <Compare expression="bezel_on">
                     <PartDraw x="0" y="0" width="450" height="450">
-                        <Line startX="225.0" startY="15.0" endX="225.0" endY="2.0"><Stroke color="#ffFF6B35" thickness="3" cap="ROUND" /></Line>
-                        <Line startX="247.8" startY="8.2" endX="248.3" endY="3.2"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="270.3" startY="11.8" endX="271.4" endY="6.9"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="292.4" startY="17.7" endX="293.9" endY="12.9"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="313.7" startY="25.8" endX="315.7" endY="21.3"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="332.5" startY="38.8" endX="336.5" endY="31.9"><Stroke color="#80FFFFFF" thickness="1.5" cap="ROUND" /></Line>
-                        <Line startX="353.1" startY="48.6" endX="356.1" endY="44.6"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="370.9" startY="63.0" endX="374.2" endY="59.3"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="387.0" startY="79.1" endX="390.7" endY="75.8"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="401.4" startY="96.9" endX="405.4" endY="93.9"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <!-- 12 o'clock — theme colour cardinal -->
+                        <Line startX="225.0" startY="15.0"  endX="225.0" endY="2.0">  <Stroke color="[CONFIGURATION.theme_color.0]" thickness="3"   cap="ROUND" /></Line>
+                        <!-- 3 o'clock -->
+                        <Line startX="435.0" startY="225.0" endX="448.0" endY="225.0"><Stroke color="[CONFIGURATION.theme_color.0]" thickness="3"   cap="ROUND" /></Line>
+                        <!-- 6 o'clock -->
+                        <Line startX="225.0" startY="435.0" endX="225.0" endY="448.0"><Stroke color="[CONFIGURATION.theme_color.0]" thickness="3"   cap="ROUND" /></Line>
+                        <!-- 9 o'clock -->
+                        <Line startX="15.0"  startY="225.0" endX="2.0"   endY="225.0"><Stroke color="[CONFIGURATION.theme_color.0]" thickness="3"   cap="ROUND" /></Line>
+                        <!-- 5-min ticks -->
+                        <Line startX="332.5" startY="38.8"  endX="336.5" endY="31.9"> <Stroke color="#80FFFFFF" thickness="1.5" cap="ROUND" /></Line>
                         <Line startX="411.2" startY="117.5" endX="418.1" endY="113.5"><Stroke color="#80FFFFFF" thickness="1.5" cap="ROUND" /></Line>
+                        <Line startX="411.2" startY="332.5" endX="418.1" endY="336.5"><Stroke color="#80FFFFFF" thickness="1.5" cap="ROUND" /></Line>
+                        <Line startX="332.5" startY="411.2" endX="336.5" endY="418.1"><Stroke color="#80FFFFFF" thickness="1.5" cap="ROUND" /></Line>
+                        <Line startX="117.5" startY="411.2" endX="113.5" endY="418.1"><Stroke color="#80FFFFFF" thickness="1.5" cap="ROUND" /></Line>
+                        <Line startX="38.8"  startY="332.5" endX="31.9"  endY="336.5"> <Stroke color="#80FFFFFF" thickness="1.5" cap="ROUND" /></Line>
+                        <Line startX="38.8"  startY="117.5" endX="31.9"  endY="113.5"> <Stroke color="#80FFFFFF" thickness="1.5" cap="ROUND" /></Line>
+                        <Line startX="117.5" startY="38.8"  endX="113.5" endY="31.9">  <Stroke color="#80FFFFFF" thickness="1.5" cap="ROUND" /></Line>
+                        <!-- 1-min ticks — selection (abbreviated, full 60-tick set) -->
+                        <Line startX="247.8" startY="8.2"   endX="248.3" endY="3.2">  <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="270.3" startY="11.8"  endX="271.4" endY="6.9">  <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="292.4" startY="17.7"  endX="293.9" endY="12.9"> <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="313.7" startY="25.8"  endX="315.7" endY="21.3"> <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="353.1" startY="48.6"  endX="356.1" endY="44.6"> <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="370.9" startY="63.0"  endX="374.2" endY="59.3"> <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="387.0" startY="79.1"  endX="390.7" endY="75.8"> <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="401.4" startY="96.9"  endX="405.4" endY="93.9"> <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
                         <Line startX="424.2" startY="136.3" endX="428.7" endY="134.3"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
                         <Line startX="432.3" startY="157.6" endX="437.1" endY="156.1"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
                         <Line startX="438.2" startY="179.7" endX="443.1" endY="178.6"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
                         <Line startX="441.8" startY="202.2" endX="446.8" endY="201.7"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="435.0" startY="225.0" endX="448.0" endY="225.0"><Stroke color="#ffFF6B35" thickness="3" cap="ROUND" /></Line>
                         <Line startX="441.8" startY="247.8" endX="446.8" endY="248.3"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
                         <Line startX="438.2" startY="270.3" endX="443.1" endY="271.4"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
                         <Line startX="432.3" startY="292.4" endX="437.1" endY="293.9"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
                         <Line startX="424.2" startY="313.7" endX="428.7" endY="315.7"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="411.2" startY="332.5" endX="418.1" endY="336.5"><Stroke color="#80FFFFFF" thickness="1.5" cap="ROUND" /></Line>
                         <Line startX="401.4" startY="353.1" endX="405.4" endY="356.1"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
                         <Line startX="387.0" startY="370.9" endX="390.7" endY="374.2"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
                         <Line startX="370.9" startY="387.0" endX="374.2" endY="390.7"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
                         <Line startX="353.1" startY="401.4" endX="356.1" endY="405.4"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="332.5" startY="411.2" endX="336.5" endY="418.1"><Stroke color="#80FFFFFF" thickness="1.5" cap="ROUND" /></Line>
                         <Line startX="313.7" startY="424.2" endX="315.7" endY="428.7"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
                         <Line startX="292.4" startY="432.3" endX="293.9" endY="437.1"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
                         <Line startX="270.3" startY="438.2" endX="271.4" endY="443.1"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
                         <Line startX="247.8" startY="441.8" endX="248.3" endY="446.8"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="225.0" startY="435.0" endX="225.0" endY="448.0"><Stroke color="#ffFF6B35" thickness="3" cap="ROUND" /></Line>
                         <Line startX="202.2" startY="441.8" endX="201.7" endY="446.8"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
                         <Line startX="179.7" startY="438.2" endX="178.6" endY="443.1"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
                         <Line startX="157.6" startY="432.3" endX="156.1" endY="437.1"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
                         <Line startX="136.3" startY="424.2" endX="134.3" endY="428.7"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="117.5" startY="411.2" endX="113.5" endY="418.1"><Stroke color="#80FFFFFF" thickness="1.5" cap="ROUND" /></Line>
-                        <Line startX="96.9" startY="401.4" endX="93.9" endY="405.4"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="79.1" startY="387.0" endX="75.8" endY="390.7"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="63.0" startY="370.9" endX="59.3" endY="374.2"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="48.6" startY="353.1" endX="44.6" endY="356.1"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="38.8" startY="332.5" endX="31.9" endY="336.5"><Stroke color="#80FFFFFF" thickness="1.5" cap="ROUND" /></Line>
-                        <Line startX="25.8" startY="313.7" endX="21.3" endY="315.7"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="17.7" startY="292.4" endX="12.9" endY="293.9"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="11.8" startY="270.3" endX="6.9" endY="271.4"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="8.2" startY="247.8" endX="3.2" endY="248.3"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="15.0" startY="225.0" endX="2.0" endY="225.0"><Stroke color="#ffFF6B35" thickness="3" cap="ROUND" /></Line>
-                        <Line startX="8.2" startY="202.2" endX="3.2" endY="201.7"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="11.8" startY="179.7" endX="6.9" endY="178.6"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="17.7" startY="157.6" endX="12.9" endY="156.1"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="25.8" startY="136.3" endX="21.3" endY="134.3"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="38.8" startY="117.5" endX="31.9" endY="113.5"><Stroke color="#80FFFFFF" thickness="1.5" cap="ROUND" /></Line>
-                        <Line startX="48.6" startY="96.9" endX="44.6" endY="93.9"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="63.0" startY="79.1" endX="59.3" endY="75.8"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="79.1" startY="63.0" endX="75.8" endY="59.3"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="96.9" startY="48.6" endX="93.9" endY="44.6"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="117.5" startY="38.8" endX="113.5" endY="31.9"><Stroke color="#80FFFFFF" thickness="1.5" cap="ROUND" /></Line>
-                        <Line startX="136.3" startY="25.8" endX="134.3" endY="21.3"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="157.6" startY="17.7" endX="156.1" endY="12.9"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="179.7" startY="11.8" endX="178.6" endY="6.9"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
-                        <Line startX="202.2" startY="8.2" endX="201.7" endY="3.2"><Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="96.9"  startY="401.4" endX="93.9"  endY="405.4"> <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="79.1"  startY="387.0" endX="75.8"  endY="390.7"> <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="63.0"  startY="370.9" endX="59.3"  endY="374.2"> <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="48.6"  startY="353.1" endX="44.6"  endY="356.1"> <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="25.8"  startY="313.7" endX="21.3"  endY="315.7"> <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="17.7"  startY="292.4" endX="12.9"  endY="293.9"> <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="11.8"  startY="270.3" endX="6.9"   endY="271.4">  <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="8.2"   startY="247.8" endX="3.2"   endY="248.3">  <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="8.2"   startY="202.2" endX="3.2"   endY="201.7">  <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="11.8"  startY="179.7" endX="6.9"   endY="178.6">  <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="17.7"  startY="157.6" endX="12.9"  endY="156.1">  <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="25.8"  startY="136.3" endX="21.3"  endY="134.3">  <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="48.6"  startY="96.9"  endX="44.6"  endY="93.9">   <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="63.0"  startY="79.1"  endX="59.3"  endY="75.8">   <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="79.1"  startY="63.0"  endX="75.8"  endY="59.3">   <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="96.9"  startY="48.6"  endX="93.9"  endY="44.6">   <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="136.3" startY="25.8"  endX="134.3" endY="21.3">   <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="157.6" startY="17.7"  endX="156.1" endY="12.9">   <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="179.7" startY="11.8"  endX="178.6" endY="6.9">    <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
+                        <Line startX="202.2" startY="8.2"   endX="201.7" endY="3.2">    <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" /></Line>
                     </PartDraw>
-                </Group>
-            </BooleanOption>
-            <BooleanOption id="FALSE" />
-        </BooleanConfiguration>
-
-        <!-- ================================================================= -->
-        <!-- LAYER 4: 12 O'CLOCK ORBIT MISSION LOGO                            -->
-        <!-- ================================================================= -->
-        <PartImage x="216" y="20" width="18" height="18">
-            <Variant mode="AMBIENT" target="alpha" value="0" />
-            <Launch target="com.samsung.android.watch.alarm" />
-            <Image resource="ic_orbit_logo" />
-        </PartImage>
-
-        <!-- ================================================================= -->
-        <!-- LAYER 5: 3D FLOATING CHRONOMETER WITH SHADOW & HIGHLIGHT BEVELS   -->
-        <!-- Tilts with wrist Gyro +3D Shadow layer + Inbuilt Alarm Launcher   -->
-        <!-- Bold 70pt Pure White Hours + Solar Orange Colon & Minutes         -->
-        <!-- ================================================================= -->
-        <Group name="digital_chronometer" x="0" y="0" width="450" height="450">
-            <Gyro
-                x="clamp([ACCELEROMETER_ANGLE_X], -60, 60) * 0.10"
-                y="clamp([ACCELEROMETER_ANGLE_Y], -60, 60) * 0.10" />
-
-            <!-- 3D Plate Drop Shadow (offset +2px, +4px) -->
-            <PartDraw x="74" y="82" width="306" height="84">
-                <Variant mode="AMBIENT" target="alpha" value="0" />
-                <RoundRectangle x="0" y="0" width="306" height="84" cornerRadiusX="20" cornerRadiusY="20">
-                    <Fill color="#75000000" />
-                </RoundRectangle>
-            </PartDraw>
-
-            <!-- 3D Smoked Glass Instrument Plate -->
-            <PartDraw x="72" y="78" width="306" height="84">
-                <Variant mode="AMBIENT" target="alpha" value="0" />
-                <Launch target="com.samsung.android.watch.alarm" />
-                <RoundRectangle x="0" y="0" width="306" height="84" cornerRadiusX="20" cornerRadiusY="20">
-                    <Fill color="#C8080E1C" />
-                    <Stroke color="#35FFFFFF" thickness="1.2" />
-                </RoundRectangle>
-                <!-- Top Light Highlight Bevel (Specular Reflection) -->
-                <Line startX="24" startY="1" endX="282" endY="1">
-                    <Stroke color="#55FFFFFF" thickness="1.5" cap="ROUND" />
-                </Line>
-            </PartDraw>
-
-            <!-- Holographic Text Shadow: Hours -->
-            <PartText x="80" y="84" width="128" height="76">
-                <Variant mode="AMBIENT" target="alpha" value="0" />
-                <Text align="END">
-                    <Font family="SYNC_TO_DEVICE" size="70" weight="BOLD" color="#65000000">
-                        <Template><![CDATA[%s]]><Parameter expression="[HOUR_0_23_Z]" /></Template>
-                    </Font>
-                </Text>
-            </PartText>
-            <!-- Hours: Bold White ("21") -->
-            <PartText x="78" y="82" width="128" height="76">
-                <Launch target="com.samsung.android.watch.alarm" />
-                <Text align="END">
-                    <Font family="SYNC_TO_DEVICE" size="70" weight="BOLD" color="#ffFFFFFF">
-                        <Variant mode="AMBIENT" target="color" value="#ffFFFFFF" />
-                        <Template><![CDATA[%s]]><Parameter expression="[HOUR_0_23_Z]" /></Template>
-                    </Font>
-                </Text>
-            </PartText>
-
-            <!-- Colon: Solar Orange (":") -->
-            <PartText x="210" y="80" width="20" height="76">
-                <Launch target="com.samsung.android.watch.alarm" />
-                <Text align="CENTER">
-                    <Font family="SYNC_TO_DEVICE" size="64" weight="BOLD" color="#ffFF6B35">
-                        <Variant mode="AMBIENT" target="color" value="#ffFF6B35" />
-                        <Template><![CDATA[:]]></Template>
-                    </Font>
-                </Text>
-            </PartText>
-
-            <!-- Holographic Text Shadow: Minutes -->
-            <PartText x="236" y="84" width="128" height="76">
-                <Variant mode="AMBIENT" target="alpha" value="0" />
-                <Text align="START">
-                    <Font family="SYNC_TO_DEVICE" size="70" weight="BOLD" color="#65000000">
-                        <Template><![CDATA[%s]]><Parameter expression="[MINUTE_Z]" /></Template>
-                    </Font>
-                </Text>
-            </PartText>
-            <!-- Minutes: Bold Solar Orange ("55") -->
-            <PartText x="234" y="82" width="128" height="76">
-                <Launch target="com.samsung.android.watch.alarm" />
-                <Text align="START">
-                    <Font family="SYNC_TO_DEVICE" size="70" weight="BOLD" color="#ffFF6B35">
-                        <Variant mode="AMBIENT" target="color" value="#ffFF6B35" />
-                        <Template><![CDATA[%s]]><Parameter expression="[MINUTE_Z]" /></Template>
-                    </Font>
-                </Text>
-            </PartText>
+                </Compare>
+            </Condition>
         </Group>
 
-        <!-- ================================================================= -->
-        <!-- LAYER 6: 3D SUB-CLOCK CHRONO PILL (Launches Samsung Stopwatch)    -->
-        <!-- ================================================================= -->
-        <Group name="chrono_telemetry" x="0" y="0" width="450" height="450">
-            <Gyro
-                x="clamp([ACCELEROMETER_ANGLE_X], -60, 60) * 0.08"
-                y="clamp([ACCELEROMETER_ANGLE_Y], -60, 60) * 0.08" />
+        <!-- =============================================================
+             LAYER 4 — TOP COMPLICATION PILL STRIP
+             Slot 1: Date/Schedule  |  Slot 2: Weather
+             ============================================================= -->
 
-            <!-- 3D Drop Shadow -->
-            <PartDraw x="147" y="166" width="160" height="26">
-                <Variant mode="AMBIENT" target="alpha" value="0" />
-                <RoundRectangle x="0" y="0" width="160" height="26" cornerRadiusX="13" cornerRadiusY="13">
-                    <Fill color="#60000000" />
-                </RoundRectangle>
-            </PartDraw>
-            <!-- Foreground Capsule -->
-            <PartDraw x="145" y="164" width="160" height="26">
-                <Variant mode="AMBIENT" target="alpha" value="0" />
-                <Launch target="com.samsung.android.watch.stopwatch" />
-                <RoundRectangle x="0" y="0" width="160" height="26" cornerRadiusX="13" cornerRadiusY="13">
-                    <Fill color="#D0080E1C" />
-                    <Stroke color="#35FFFFFF" thickness="1" />
-                </RoundRectangle>
-                <!-- Orange Active Chrono Dot -->
-                <Ellipse x="13" y="9" width="8" height="8">
-                    <Fill color="#ffFF6B35" />
-                </Ellipse>
-            </PartDraw>
-            <PartText x="169" y="168" width="126" height="18">
-                <Variant mode="AMBIENT" target="alpha" value="0" />
-                <Launch target="com.samsung.android.watch.stopwatch" />
-                <Text align="START">
-                    <Font family="SYNC_TO_DEVICE" size="11" weight="BOLD" color="#ffE0E6ED">
-                        <Template><![CDATA[CHRONO • SEC %s]]><Parameter expression="[SECOND_Z]" /></Template>
-                    </Font>
-                </Text>
-            </PartText>
-        </Group>
-
-        <!-- ================================================================= -->
-        <!-- COMPLICATION SLOT 1: TOP-LEFT DATE & SCHEDULE PILL                -->
-        <!-- Displays Samsung Calendar / Day & Date / Next Event               -->
-        <!-- Tapping launches Samsung Calendar; Customizable in Watch Editor   -->
-        <!-- ================================================================= -->
+        <!-- COMPLICATION SLOT 1 — Date / Schedule (top-left) -->
         <ComplicationSlot
             slotId="1"
-            displayName="complication_date"
+            displayName="@string/complication_date"
             supportedTypes="SHORT_TEXT SMALL_IMAGE EMPTY"
-            x="92"
-            y="42"
-            width="114"
-            height="28">
+            x="92" y="42" width="114" height="28">
             <BoundingBox x="0" y="0" width="114" height="28" />
             <DefaultProviderPolicy
                 defaultSystemProvider="DAY_AND_DATE"
                 defaultSystemProviderType="SHORT_TEXT" />
+            <!-- SHORT_TEXT variant -->
             <Complication type="SHORT_TEXT">
-                <!-- 3D Drop Shadow -->
                 <PartDraw x="2" y="2" width="114" height="28">
                     <Variant mode="AMBIENT" target="alpha" value="0" />
                     <RoundRectangle x="0" y="0" width="114" height="28" cornerRadiusX="14" cornerRadiusY="14">
                         <Fill color="#60000000" />
                     </RoundRectangle>
                 </PartDraw>
-                <!-- Smoked Glass Capsule -->
                 <PartDraw x="0" y="0" width="114" height="28">
                     <RoundRectangle x="0" y="0" width="114" height="28" cornerRadiusX="14" cornerRadiusY="14">
                         <Fill color="#D8070D18" />
-                        <Stroke color="#40FFFFFF" thickness="1.2" />
+                        <Stroke color="[CONFIGURATION.theme_color.2]" thickness="1.2" />
                     </RoundRectangle>
                     <Line startX="14" startY="1" endX="100" endY="1">
-                        <Stroke color="#50FFFFFF" thickness="1" cap="ROUND" />
+                        <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" />
                     </Line>
                 </PartDraw>
                 <PartImage x="8" y="7" width="14" height="14">
@@ -349,12 +323,16 @@
                     </Text>
                 </PartText>
             </Complication>
+            <!-- EMPTY fallback -->
             <Complication type="EMPTY">
                 <PartDraw x="0" y="0" width="114" height="28">
                     <RoundRectangle x="0" y="0" width="114" height="28" cornerRadiusX="14" cornerRadiusY="14">
                         <Fill color="#D8070D18" />
-                        <Stroke color="#40FFFFFF" thickness="1.2" />
+                        <Stroke color="[CONFIGURATION.theme_color.2]" thickness="1.2" />
                     </RoundRectangle>
+                    <Line startX="14" startY="1" endX="100" endY="1">
+                        <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" />
+                    </Line>
                 </PartDraw>
                 <PartImage x="8" y="7" width="14" height="14">
                     <Image resource="ic_calendar" />
@@ -373,58 +351,12 @@
             </Complication>
         </ComplicationSlot>
 
-        <!-- ================================================================= -->
-        <!-- COMPLICATION SLOT 2: TOP-RIGHT WEATHER & ATMOSPHERE PILL          -->
-        <!-- Displays Samsung Weather temperature and conditions               -->
-        <!-- Tapping launches Samsung Weather; Customizable in Watch Editor    -->
-        <!-- ================================================================= -->
-        <!-- ================================================================= -->
-        <!-- WEATHER UNDERLYING FALLBACK CARD (Always visible if slot unconfigured) -->
-        <!-- ================================================================= -->
-        <Group name="weather_fallback_card" x="244" y="42" width="114" height="28">
-            <PartDraw x="2" y="2" width="114" height="28">
-                <Variant mode="AMBIENT" target="alpha" value="0" />
-                <RoundRectangle x="0" y="0" width="114" height="28" cornerRadiusX="14" cornerRadiusY="14">
-                    <Fill color="#60000000" />
-                </RoundRectangle>
-            </PartDraw>
-            <PartDraw x="0" y="0" width="114" height="28">
-                <Launch target="com.samsung.android.watch.weather" />
-                <RoundRectangle x="0" y="0" width="114" height="28" cornerRadiusX="14" cornerRadiusY="14">
-                    <Fill color="#D8070D18" />
-                    <Stroke color="#40FFFFFF" thickness="1.2" />
-                </RoundRectangle>
-                <Line startX="14" startY="1" endX="100" endY="1">
-                    <Stroke color="#50FFFFFF" thickness="1" cap="ROUND" />
-                </Line>
-            </PartDraw>
-            <PartImage x="8" y="7" width="14" height="14">
-                <Launch target="com.samsung.android.watch.weather" />
-                <Image resource="ic_weather_cloud_sun" />
-            </PartImage>
-            <PartText x="26" y="6" width="82" height="16">
-                <Launch target="com.samsung.android.watch.weather" />
-                <Text align="START">
-                    <Font family="SYNC_TO_DEVICE" size="11" weight="BOLD" color="#ffFFFFFF">
-                        <Template><![CDATA[24° • CLEAR]]></Template>
-                    </Font>
-                </Text>
-            </PartText>
-        </Group>
-
-        <!-- ================================================================= -->
-        <!-- COMPLICATION SLOT 2: TOP-RIGHT WEATHER & ATMOSPHERE PILL          -->
-        <!-- Displays Samsung Weather temperature and conditions               -->
-        <!-- Tapping launches Samsung Weather; Customizable in Watch Editor    -->
-        <!-- ================================================================= -->
+        <!-- COMPLICATION SLOT 2 — Weather / Atmosphere (top-right) -->
         <ComplicationSlot
             slotId="2"
-            displayName="complication_weather"
+            displayName="@string/complication_weather"
             supportedTypes="SHORT_TEXT SMALL_IMAGE EMPTY"
-            x="244"
-            y="42"
-            width="114"
-            height="28">
+            x="244" y="42" width="114" height="28">
             <BoundingBox x="0" y="0" width="114" height="28" />
             <DefaultProviderPolicy
                 defaultSystemProvider="SUNRISE_SUNSET"
@@ -432,21 +364,19 @@
                 primaryProvider="com.samsung.android.watch.weather/com.samsung.android.watch.weather.complication.WeatherComplicationService"
                 primaryProviderType="SHORT_TEXT" />
             <Complication type="SHORT_TEXT">
-                <!-- 3D Drop Shadow -->
                 <PartDraw x="2" y="2" width="114" height="28">
                     <Variant mode="AMBIENT" target="alpha" value="0" />
                     <RoundRectangle x="0" y="0" width="114" height="28" cornerRadiusX="14" cornerRadiusY="14">
                         <Fill color="#60000000" />
                     </RoundRectangle>
                 </PartDraw>
-                <!-- Smoked Glass Capsule -->
                 <PartDraw x="0" y="0" width="114" height="28">
                     <RoundRectangle x="0" y="0" width="114" height="28" cornerRadiusX="14" cornerRadiusY="14">
                         <Fill color="#D8070D18" />
-                        <Stroke color="#40FFFFFF" thickness="1.2" />
+                        <Stroke color="[CONFIGURATION.theme_color.2]" thickness="1.2" />
                     </RoundRectangle>
                     <Line startX="14" startY="1" endX="100" endY="1">
-                        <Stroke color="#50FFFFFF" thickness="1" cap="ROUND" />
+                        <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" />
                     </Line>
                 </PartDraw>
                 <PartImage x="8" y="7" width="14" height="14">
@@ -464,10 +394,10 @@
                 <PartDraw x="0" y="0" width="114" height="28">
                     <RoundRectangle x="0" y="0" width="114" height="28" cornerRadiusX="14" cornerRadiusY="14">
                         <Fill color="#D8070D18" />
-                        <Stroke color="#40FFFFFF" thickness="1.2" />
+                        <Stroke color="[CONFIGURATION.theme_color.2]" thickness="1.2" />
                     </RoundRectangle>
                     <Line startX="14" startY="1" endX="100" endY="1">
-                        <Stroke color="#50FFFFFF" thickness="1" cap="ROUND" />
+                        <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" />
                     </Line>
                 </PartDraw>
                 <PartImage x="8" y="7" width="14" height="14">
@@ -476,232 +406,247 @@
                 <PartText x="26" y="6" width="82" height="16">
                     <Text align="START">
                         <Font family="SYNC_TO_DEVICE" size="11" weight="BOLD" color="#ffFFFFFF">
-                            <Template><![CDATA[24° • CLEAR]]></Template>
+                            <Template><![CDATA[%d° • CLEAR]]><Parameter expression="[WEATHER.TEMPERATURE]" /></Template>
                         </Font>
                     </Text>
                 </PartText>
             </Complication>
         </ComplicationSlot>
 
-        <!-- ================================================================= -->
-        <!-- COMPLICATION SLOT 3: BOTTOM-LEFT HEART RATE / HEALTH POD          -->
-        <!-- Displays Samsung Health Heart Rate / Health Telemetry             -->
-        <!-- Tapping launches Samsung Health; Customizable in Watch Editor     -->
-        <!-- ================================================================= -->
-        <ComplicationSlot
-            slotId="3"
-            displayName="complication_heart_rate"
-            supportedTypes="SHORT_TEXT RANGED_VALUE SMALL_IMAGE EMPTY"
-            x="60"
-            y="284"
-            width="94"
-            height="52">
-            <BoundingBox x="0" y="0" width="94" height="52" />
-            <DefaultProviderPolicy
-                defaultSystemProvider="HEART_RATE"
-                defaultSystemProviderType="SHORT_TEXT"
-                primaryProvider="com.samsung.android.wear.shealth/.complications.heartrate.HeartrateComplicationProviderService" />
-            <Complication type="SHORT_TEXT">
-                <!-- 3D Drop Shadow -->
-                <PartDraw x="2" y="3" width="94" height="52">
-                    <Variant mode="AMBIENT" target="alpha" value="0" />
-                    <RoundRectangle x="0" y="0" width="94" height="52" cornerRadiusX="14" cornerRadiusY="14">
-                        <Fill color="#70000000" />
-                    </RoundRectangle>
-                </PartDraw>
-                <!-- Base Capsule -->
-                <PartDraw x="0" y="0" width="94" height="52">
-                    <RoundRectangle x="0" y="0" width="94" height="52" cornerRadiusX="14" cornerRadiusY="14">
-                        <Fill color="#E8080E1C" />
-                        <Stroke color="#80FF3366" thickness="1.5" />
-                    </RoundRectangle>
-                    <!-- Top Light Highlight Bevel -->
-                    <Line startX="14" startY="1" endX="80" endY="1">
-                        <Stroke color="#50FFFFFF" thickness="1" cap="ROUND" />
-                    </Line>
-                    <!-- Recessed Bottom Track -->
-                    <Line startX="16" startY="47" endX="78" endY="47">
-                        <Stroke color="#25FFFFFF" thickness="2.5" cap="ROUND" />
-                    </Line>
-                    <!-- Bottom Coral Glow Line -->
-                    <Line startX="16" startY="47" endX="78" endY="47">
-                        <Stroke color="#ffFF3366" thickness="2.5" cap="ROUND" />
-                    </Line>
-                </PartDraw>
-                <PartImage x="10" y="8" width="14" height="14">
-                    <Image resource="[COMPLICATION.MONOCHROMATIC_IMAGE]" />
-                </PartImage>
-                <PartText x="28" y="7" width="54" height="15">
-                    <Text align="START">
-                        <Font family="SYNC_TO_DEVICE" size="10" weight="BOLD" color="#ffFF3366">
-                            <Template><![CDATA[PULSE]]></Template>
-                        </Font>
-                    </Text>
-                </PartText>
-                <PartText x="2" y="21" width="90" height="26">
-                    <Text align="CENTER">
-                        <Font family="SYNC_TO_DEVICE" size="21" weight="BOLD" color="#ffFFFFFF">
-                            <Variant mode="AMBIENT" target="color" value="#ffFFFFFF" />
-                            <Template><![CDATA[%s]]><Parameter expression="[COMPLICATION.TEXT]" /></Template>
-                        </Font>
-                    </Text>
-                </PartText>
-            </Complication>
-            <Complication type="EMPTY">
-                <PartDraw x="0" y="0" width="94" height="52">
-                    <RoundRectangle x="0" y="0" width="94" height="52" cornerRadiusX="14" cornerRadiusY="14">
-                        <Fill color="#E8080E1C" />
-                        <Stroke color="#80FF3366" thickness="1.5" />
-                    </RoundRectangle>
-                    <Line startX="14" startY="1" endX="80" endY="1">
-                        <Stroke color="#50FFFFFF" thickness="1" cap="ROUND" />
-                    </Line>
-                    <Line startX="16" startY="47" endX="78" endY="47">
-                        <Stroke color="#ffFF3366" thickness="2.5" cap="ROUND" />
-                    </Line>
-                </PartDraw>
-                <PartImage x="10" y="8" width="14" height="14">
-                    <Image resource="ic_heart" />
-                </PartImage>
-                <PartText x="28" y="7" width="54" height="15">
-                    <Text align="START">
-                        <Font family="SYNC_TO_DEVICE" size="10" weight="BOLD" color="#ffFF3366">
-                            <Template><![CDATA[PULSE]]></Template>
-                        </Font>
-                    </Text>
-                </PartText>
-                <PartText x="2" y="21" width="90" height="26">
-                    <Text align="CENTER">
-                        <Font family="SYNC_TO_DEVICE" size="21" weight="BOLD" color="#ffFFFFFF">
-                            <Template><![CDATA[%d]]><Parameter expression="[HEART_RATE] > 0 ? round([HEART_RATE]) : 88" /></Template>
-                        </Font>
-                    </Text>
-                </PartText>
-            </Complication>
-        </ComplicationSlot>
+        <!-- =============================================================
+             LAYER 5 — DIGITAL CLOCK
+             Font family switches on font_style config.
+             Layout: full (HH:MM) or minimal (HH only).
+             ============================================================= -->
+        <Group name="digital_clock" x="0" y="0" width="450" height="450">
+            <Launch target="com.unlockedwear.wear.debug" />
 
-        <!-- ================================================================= -->
-        <!-- COMPLICATION SLOT 4: BOTTOM-CENTER BATTERY POWER POD              -->
-        <!-- Displays Samsung Battery with dynamic gauge & percentage          -->
-        <!-- Tapping launches Battery Settings; Customizable in Watch Editor   -->
-        <!-- ================================================================= -->
+            <!-- Hours -->
+            <PartText x="82" y="76" width="130" height="80">
+                <Text align="END">
+                    <Condition>
+                        <Expressions>
+                            <Expression name="mono_font"><![CDATA[[CONFIGURATION.font_style] == 0]]></Expression>
+                        </Expressions>
+                        <Compare expression="mono_font">
+                            <Font family="SYNC_TO_DEVICE" size="78" weight="BOLD" color="#ffFFFFFF">
+                                <Variant mode="AMBIENT" target="color" value="#ffFFFFFF" />
+                                <Template><![CDATA[%s]]><Parameter expression="[HOUR_0_23_Z]" /></Template>
+                            </Font>
+                        </Compare>
+                        <Default>
+                            <Font family="DEFAULT" size="78" weight="BOLD" color="#ffFFFFFF">
+                                <Variant mode="AMBIENT" target="color" value="#ffFFFFFF" />
+                                <Template><![CDATA[%s]]><Parameter expression="[HOUR_0_23_Z]" /></Template>
+                            </Font>
+                        </Default>
+                    </Condition>
+                </Text>
+            </PartText>
+
+            <!-- Colon separator — theme-coloured -->
+            <PartText x="210" y="74" width="20" height="80">
+                <Text align="CENTER">
+                    <Font family="SYNC_TO_DEVICE" size="72" weight="BOLD" color="[CONFIGURATION.theme_color.0]">
+                        <Variant mode="AMBIENT" target="color" value="[CONFIGURATION.theme_color.0]" />
+                        <Template><![CDATA[:]]></Template>
+                    </Font>
+                </Text>
+            </PartText>
+
+            <!-- Minutes — theme-coloured -->
+            <PartText x="230" y="76" width="130" height="80">
+                <Text align="START">
+                    <Condition>
+                        <Expressions>
+                            <Expression name="mono_font_m"><![CDATA[[CONFIGURATION.font_style] == 0]]></Expression>
+                        </Expressions>
+                        <Compare expression="mono_font_m">
+                            <Font family="SYNC_TO_DEVICE" size="78" weight="BOLD" color="[CONFIGURATION.theme_color.0]">
+                                <Variant mode="AMBIENT" target="color" value="[CONFIGURATION.theme_color.0]" />
+                                <Template><![CDATA[%s]]><Parameter expression="[MINUTE_Z]" /></Template>
+                            </Font>
+                        </Compare>
+                        <Default>
+                            <Font family="DEFAULT" size="78" weight="BOLD" color="[CONFIGURATION.theme_color.0]">
+                                <Variant mode="AMBIENT" target="color" value="[CONFIGURATION.theme_color.0]" />
+                                <Template><![CDATA[%s]]><Parameter expression="[MINUTE_Z]" /></Template>
+                            </Font>
+                        </Default>
+                    </Condition>
+                </Text>
+            </PartText>
+        </Group>
+
+        <!-- =============================================================
+             LAYER 6 — SECONDS SUB-DIAL (togglable, hidden in ambient)
+             Thin arc + seconds numerals at the 6 o'clock position.
+             ============================================================= -->
+        <Group name="seconds_subdial" x="145" y="158" width="160" height="30">
+            <Variant mode="AMBIENT" target="alpha" value="0" />
+            <Condition>
+                <Expressions>
+                    <Expression name="secs_on"><![CDATA[[CONFIGURATION.show_seconds]]]></Expression>
+                </Expressions>
+                <Compare expression="secs_on">
+                    <!-- Track -->
+                    <PartDraw x="0" y="0" width="160" height="30">
+                        <RoundRectangle x="0" y="0" width="160" height="30" cornerRadiusX="15" cornerRadiusY="15">
+                            <Fill color="#B5090F1E" />
+                            <Stroke color="#30FFFFFF" thickness="1" />
+                        </RoundRectangle>
+                        <!-- Progress fill — theme colour -->
+                        <RoundRectangle x="1" y="1"
+                            width="clamp(([SECOND] / 59.0) * 158.0, 2.0, 158.0)"
+                            height="28"
+                            cornerRadiusX="14" cornerRadiusY="14">
+                            <Fill color="[CONFIGURATION.theme_color.1]" />
+                        </RoundRectangle>
+                    </PartDraw>
+                    <!-- Orange active dot -->
+                    <PartDraw x="0" y="0" width="160" height="30">
+                        <Ellipse x="clamp(([SECOND] / 59.0) * 152.0, 0.0, 152.0)" y="11" width="8" height="8">
+                            <Fill color="[CONFIGURATION.theme_color.0]" />
+                        </Ellipse>
+                    </PartDraw>
+                    <!-- Seconds text -->
+                    <PartText x="0" y="6" width="160" height="18">
+                        <Text align="CENTER">
+                            <Font family="SYNC_TO_DEVICE" size="11" weight="BOLD" color="#ffFFFFFF">
+                                <Template><![CDATA[SEC %s]]><Parameter expression="[SECOND_Z]" /></Template>
+                            </Font>
+                        </Text>
+                    </PartText>
+                </Compare>
+            </Condition>
+        </Group>
+
+        <!-- =============================================================
+             LAYER 7 — MIDDLE-ROW COMPLICATION SLOTS
+             Slot 6: Mission Ring Gauge (ranged value)
+             Slot 7: Co-Pilot AI Briefing (long text)
+             ============================================================= -->
+
+        <!-- COMPLICATION SLOT 6 — Mission Ring Gauge (bottom-left of middle row) -->
         <ComplicationSlot
-            slotId="4"
-            displayName="complication_battery"
-            supportedTypes="SHORT_TEXT RANGED_VALUE SMALL_IMAGE EMPTY"
-            x="178"
-            y="284"
-            width="94"
-            height="52">
-            <BoundingBox x="0" y="0" width="94" height="52" />
+            slotId="6"
+            displayName="@string/complication_mission_ring"
+            supportedTypes="RANGED_VALUE SHORT_TEXT EMPTY"
+            x="60" y="200" width="150" height="78">
+            <BoundingBox x="0" y="0" width="150" height="78" />
             <DefaultProviderPolicy
+                primaryProvider="com.unlockedwear.wear/.complications.MissionRingComplicationService"
+                primaryProviderType="RANGED_VALUE"
                 defaultSystemProvider="WATCH_BATTERY"
                 defaultSystemProviderType="RANGED_VALUE" />
+
             <Complication type="RANGED_VALUE">
-                <!-- 3D Drop Shadow -->
-                <PartDraw x="2" y="3" width="94" height="52">
+                <!-- Drop shadow -->
+                <PartDraw x="2" y="3" width="150" height="78">
                     <Variant mode="AMBIENT" target="alpha" value="0" />
-                    <RoundRectangle x="0" y="0" width="94" height="52" cornerRadiusX="14" cornerRadiusY="14">
+                    <RoundRectangle x="0" y="0" width="150" height="78" cornerRadiusX="18" cornerRadiusY="18">
                         <Fill color="#70000000" />
                     </RoundRectangle>
                 </PartDraw>
-                <!-- Base Capsule -->
-                <PartDraw x="0" y="0" width="94" height="52">
-                    <RoundRectangle x="0" y="0" width="94" height="52" cornerRadiusX="14" cornerRadiusY="14">
+                <!-- Card -->
+                <PartDraw x="0" y="0" width="150" height="78">
+                    <RoundRectangle x="0" y="0" width="150" height="78" cornerRadiusX="18" cornerRadiusY="18">
                         <Fill color="#E8080E1C" />
-                        <Stroke color="#8000E676" thickness="1.5" />
+                        <Stroke color="[CONFIGURATION.theme_color.2]" thickness="1.5" />
                     </RoundRectangle>
-                    <!-- Top Light Highlight Bevel -->
-                    <Line startX="14" startY="1" endX="80" endY="1">
-                        <Stroke color="#50FFFFFF" thickness="1" cap="ROUND" />
+                    <Line startX="18" startY="1" endX="132" endY="1">
+                        <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" />
                     </Line>
-                    <!-- Recessed Track -->
-                    <Line startX="16" startY="47" endX="78" endY="47">
-                        <Stroke color="#25FFFFFF" thickness="2.5" cap="ROUND" />
+                    <!-- Bottom progress track -->
+                    <Line startX="18" startY="72" endX="132" endY="72">
+                        <Stroke color="#25FFFFFF" thickness="3" cap="ROUND" />
                     </Line>
-                    <!-- Dynamic Progress Line -->
-                    <Line startX="16" startY="47"
-                          endX="16 + clamp(([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) / ([COMPLICATION.RANGED_VALUE_MAX] - [COMPLICATION.RANGED_VALUE_MIN]), 0, 1) * 62"
-                          endY="47">
-                        <Stroke color="#ff00E676" thickness="2.5" cap="ROUND" />
+                    <!-- Dynamic progress bar -->
+                    <Line startX="18" startY="72"
+                          endX="18 + clamp(([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) / ([COMPLICATION.RANGED_VALUE_MAX] - [COMPLICATION.RANGED_VALUE_MIN]), 0.0, 1.0) * 114.0"
+                          endY="72">
+                        <Stroke color="[CONFIGURATION.theme_color.0]" thickness="3" cap="ROUND" />
                     </Line>
                 </PartDraw>
-                <PartImage x="10" y="8" width="14" height="14">
+                <!-- Icon -->
+                <PartImage x="12" y="10" width="18" height="18">
+                    <Variant mode="AMBIENT" target="alpha" value="0" />
                     <Image resource="[COMPLICATION.MONOCHROMATIC_IMAGE]" />
                 </PartImage>
-                <PartText x="28" y="7" width="54" height="15">
+                <!-- Label -->
+                <PartText x="34" y="8" width="104" height="15">
                     <Text align="START">
-                        <Font family="SYNC_TO_DEVICE" size="10" weight="BOLD" color="#ff00E676">
-                            <Template><![CDATA[BATTERY]]></Template>
+                        <Font family="SYNC_TO_DEVICE" size="10" weight="BOLD" color="[CONFIGURATION.theme_color.0]">
+                            <Template><![CDATA[%s]]><Parameter expression="[COMPLICATION.TITLE]" /></Template>
                         </Font>
                     </Text>
                 </PartText>
-                <PartText x="2" y="21" width="90" height="26">
+                <!-- Value -->
+                <PartText x="4" y="24" width="142" height="44">
                     <Text align="CENTER">
-                        <Font family="SYNC_TO_DEVICE" size="21" weight="BOLD" color="#ffFFFFFF">
+                        <Font family="SYNC_TO_DEVICE" size="30" weight="BOLD" color="#ffFFFFFF">
                             <Variant mode="AMBIENT" target="color" value="#ffFFFFFF" />
                             <Template><![CDATA[%s]]><Parameter expression="[COMPLICATION.TEXT]" /></Template>
                         </Font>
                     </Text>
                 </PartText>
             </Complication>
+
             <Complication type="SHORT_TEXT">
-                <PartDraw x="0" y="0" width="94" height="52">
-                    <RoundRectangle x="0" y="0" width="94" height="52" cornerRadiusX="14" cornerRadiusY="14">
+                <PartDraw x="0" y="0" width="150" height="78">
+                    <RoundRectangle x="0" y="0" width="150" height="78" cornerRadiusX="18" cornerRadiusY="18">
                         <Fill color="#E8080E1C" />
-                        <Stroke color="#8000E676" thickness="1.5" />
+                        <Stroke color="[CONFIGURATION.theme_color.2]" thickness="1.5" />
                     </RoundRectangle>
-                    <Line startX="14" startY="1" endX="80" endY="1">
-                        <Stroke color="#50FFFFFF" thickness="1" cap="ROUND" />
-                    </Line>
-                    <Line startX="16" startY="47" endX="78" endY="47">
-                        <Stroke color="#ff00E676" thickness="2.5" cap="ROUND" />
+                    <Line startX="18" startY="72" endX="132" endY="72">
+                        <Stroke color="[CONFIGURATION.theme_color.1]" thickness="3" cap="ROUND" />
                     </Line>
                 </PartDraw>
-                <PartImage x="10" y="8" width="14" height="14">
+                <PartImage x="12" y="10" width="18" height="18">
+                    <Variant mode="AMBIENT" target="alpha" value="0" />
                     <Image resource="[COMPLICATION.MONOCHROMATIC_IMAGE]" />
                 </PartImage>
-                <PartText x="28" y="7" width="54" height="15">
+                <PartText x="34" y="8" width="104" height="15">
                     <Text align="START">
-                        <Font family="SYNC_TO_DEVICE" size="10" weight="BOLD" color="#ff00E676">
-                            <Template><![CDATA[BATTERY]]></Template>
+                        <Font family="SYNC_TO_DEVICE" size="10" weight="BOLD" color="[CONFIGURATION.theme_color.0]">
+                            <Template><![CDATA[%s]]><Parameter expression="[COMPLICATION.TITLE]" /></Template>
                         </Font>
                     </Text>
                 </PartText>
-                <PartText x="2" y="21" width="90" height="26">
+                <PartText x="4" y="24" width="142" height="44">
                     <Text align="CENTER">
-                        <Font family="SYNC_TO_DEVICE" size="21" weight="BOLD" color="#ffFFFFFF">
+                        <Font family="SYNC_TO_DEVICE" size="28" weight="BOLD" color="#ffFFFFFF">
+                            <Variant mode="AMBIENT" target="color" value="#ffFFFFFF" />
                             <Template><![CDATA[%s]]><Parameter expression="[COMPLICATION.TEXT]" /></Template>
                         </Font>
                     </Text>
                 </PartText>
             </Complication>
+
             <Complication type="EMPTY">
-                <PartDraw x="0" y="0" width="94" height="52">
-                    <RoundRectangle x="0" y="0" width="94" height="52" cornerRadiusX="14" cornerRadiusY="14">
+                <PartDraw x="0" y="0" width="150" height="78">
+                    <RoundRectangle x="0" y="0" width="150" height="78" cornerRadiusX="18" cornerRadiusY="18">
                         <Fill color="#E8080E1C" />
-                        <Stroke color="#8000E676" thickness="1.5" />
+                        <Stroke color="[CONFIGURATION.theme_color.2]" thickness="1.5" />
                     </RoundRectangle>
-                    <Line startX="14" startY="1" endX="80" endY="1">
-                        <Stroke color="#50FFFFFF" thickness="1" cap="ROUND" />
-                    </Line>
-                    <Line startX="16" startY="47" endX="78" endY="47">
-                        <Stroke color="#ff00E676" thickness="2.5" cap="ROUND" />
+                    <Line startX="18" startY="72" endX="132" endY="72">
+                        <Stroke color="[CONFIGURATION.theme_color.1]" thickness="3" cap="ROUND" />
                     </Line>
                 </PartDraw>
-                <PartImage x="10" y="8" width="14" height="14">
-                    <Image resource="ic_battery_bolt" />
+                <PartImage x="12" y="10" width="18" height="18">
+                    <Variant mode="AMBIENT" target="alpha" value="0" />
+                    <Image resource="ic_orbit_logo" />
                 </PartImage>
-                <PartText x="28" y="7" width="54" height="15">
+                <PartText x="34" y="8" width="104" height="15">
                     <Text align="START">
-                        <Font family="SYNC_TO_DEVICE" size="10" weight="BOLD" color="#ff00E676">
-                            <Template><![CDATA[BATTERY]]></Template>
+                        <Font family="SYNC_TO_DEVICE" size="10" weight="BOLD" color="[CONFIGURATION.theme_color.0]">
+                            <Template><![CDATA[RING]]></Template>
                         </Font>
                     </Text>
                 </PartText>
-                <PartText x="2" y="21" width="90" height="26">
+                <PartText x="4" y="24" width="142" height="44">
                     <Text align="CENTER">
-                        <Font family="SYNC_TO_DEVICE" size="21" weight="BOLD" color="#ffFFFFFF">
+                        <Font family="SYNC_TO_DEVICE" size="28" weight="BOLD" color="#ffFFFFFF">
                             <Template><![CDATA[%d%%]]><Parameter expression="[BATTERY_PERCENT]" /></Template>
                         </Font>
                     </Text>
@@ -709,141 +654,413 @@
             </Complication>
         </ComplicationSlot>
 
-        <!-- ================================================================= -->
-        <!-- COMPLICATION SLOT 5: BOTTOM-RIGHT DAILY STEPS / GOAL PROGRESS POD -->
-        <!-- Displays Samsung Health Step Count with dynamic goal progress     -->
-        <!-- Tapping launches Samsung Health; Customizable in Watch Editor     -->
-        <!-- ================================================================= -->
+        <!-- COMPLICATION SLOT 7 — Co-Pilot AI Briefing (bottom-right of middle row) -->
         <ComplicationSlot
-            slotId="5"
-            displayName="complication_steps"
-            supportedTypes="SHORT_TEXT RANGED_VALUE GOAL_PROGRESS SMALL_IMAGE EMPTY"
-            x="296"
-            y="284"
-            width="94"
-            height="52">
-            <BoundingBox x="0" y="0" width="94" height="52" />
+            slotId="7"
+            displayName="@string/complication_copilot"
+            supportedTypes="LONG_TEXT SHORT_TEXT EMPTY"
+            x="240" y="200" width="150" height="78">
+            <BoundingBox x="0" y="0" width="150" height="78" />
             <DefaultProviderPolicy
-                defaultSystemProvider="STEP_COUNT"
-                defaultSystemProviderType="SHORT_TEXT"
-                primaryProvider="com.samsung.android.wear.shealth/.complications.steps.StepsComplicationProviderService" />
-            <Complication type="GOAL_PROGRESS">
-                <!-- 3D Drop Shadow -->
-                <PartDraw x="2" y="3" width="94" height="52">
+                primaryProvider="com.unlockedwear.wear/.complications.CoPilotComplicationService"
+                primaryProviderType="LONG_TEXT"
+                defaultSystemProvider="SUNRISE_SUNSET"
+                defaultSystemProviderType="SHORT_TEXT" />
+
+            <Complication type="LONG_TEXT">
+                <PartDraw x="2" y="3" width="150" height="78">
                     <Variant mode="AMBIENT" target="alpha" value="0" />
-                    <RoundRectangle x="0" y="0" width="94" height="52" cornerRadiusX="14" cornerRadiusY="14">
+                    <RoundRectangle x="0" y="0" width="150" height="78" cornerRadiusX="18" cornerRadiusY="18">
                         <Fill color="#70000000" />
                     </RoundRectangle>
                 </PartDraw>
-                <!-- Base Capsule -->
-                <PartDraw x="0" y="0" width="94" height="52">
-                    <RoundRectangle x="0" y="0" width="94" height="52" cornerRadiusX="14" cornerRadiusY="14">
+                <PartDraw x="0" y="0" width="150" height="78">
+                    <RoundRectangle x="0" y="0" width="150" height="78" cornerRadiusX="18" cornerRadiusY="18">
                         <Fill color="#E8080E1C" />
-                        <Stroke color="#80B388FF" thickness="1.5" />
+                        <Stroke color="[CONFIGURATION.theme_color.2]" thickness="1.5" />
                     </RoundRectangle>
-                    <!-- Top Light Highlight Bevel -->
-                    <Line startX="14" startY="1" endX="80" endY="1">
-                        <Stroke color="#50FFFFFF" thickness="1" cap="ROUND" />
-                    </Line>
-                    <!-- Recessed Track -->
-                    <Line startX="16" startY="47" endX="78" endY="47">
-                        <Stroke color="#25FFFFFF" thickness="2.5" cap="ROUND" />
-                    </Line>
-                    <!-- Dynamic Goal Progress Line -->
-                    <Line startX="16" startY="47"
-                          endX="16 + clamp([COMPLICATION.GOAL_PROGRESS_VALUE] / [COMPLICATION.GOAL_PROGRESS_TARGET_VALUE], 0, 1) * 62"
-                          endY="47">
-                        <Stroke color="#ffB388FF" thickness="2.5" cap="ROUND" />
+                    <Line startX="18" startY="1" endX="132" endY="1">
+                        <Stroke color="#40FFFFFF" thickness="1" cap="ROUND" />
                     </Line>
                 </PartDraw>
-                <PartImage x="10" y="8" width="14" height="14">
-                    <Image resource="[COMPLICATION.MONOCHROMATIC_IMAGE]" />
+                <PartImage x="12" y="10" width="14" height="14">
+                    <Variant mode="AMBIENT" target="alpha" value="0" />
+                    <Image resource="ic_copilot_sparkle" />
                 </PartImage>
-                <PartText x="28" y="7" width="54" height="15">
+                <PartText x="30" y="8" width="112" height="14">
                     <Text align="START">
-                        <Font family="SYNC_TO_DEVICE" size="10" weight="BOLD" color="#ffB388FF">
-                            <Template><![CDATA[STEPS]]></Template>
+                        <Font family="SYNC_TO_DEVICE" size="9" weight="BOLD" color="[CONFIGURATION.theme_color.0]">
+                            <Template><![CDATA[AI CO-PILOT]]></Template>
                         </Font>
                     </Text>
                 </PartText>
-                <PartText x="2" y="21" width="90" height="26">
-                    <Text align="CENTER">
-                        <Font family="SYNC_TO_DEVICE" size="18" weight="BOLD" color="#ffFFFFFF">
+                <PartText x="8" y="24" width="136" height="48">
+                    <Text align="START">
+                        <Font family="SYNC_TO_DEVICE" size="11" weight="NORMAL" color="#ffFFFFFF">
                             <Variant mode="AMBIENT" target="color" value="#ffFFFFFF" />
                             <Template><![CDATA[%s]]><Parameter expression="[COMPLICATION.TEXT]" /></Template>
                         </Font>
                     </Text>
                 </PartText>
             </Complication>
+
             <Complication type="SHORT_TEXT">
-                <PartDraw x="0" y="0" width="94" height="52">
-                    <RoundRectangle x="0" y="0" width="94" height="52" cornerRadiusX="14" cornerRadiusY="14">
+                <PartDraw x="0" y="0" width="150" height="78">
+                    <RoundRectangle x="0" y="0" width="150" height="78" cornerRadiusX="18" cornerRadiusY="18">
                         <Fill color="#E8080E1C" />
-                        <Stroke color="#80B388FF" thickness="1.5" />
+                        <Stroke color="[CONFIGURATION.theme_color.2]" thickness="1.5" />
                     </RoundRectangle>
-                    <Line startX="14" startY="1" endX="80" endY="1">
-                        <Stroke color="#50FFFFFF" thickness="1" cap="ROUND" />
-                    </Line>
-                    <Line startX="16" startY="47" endX="78" endY="47">
-                        <Stroke color="#ffB388FF" thickness="2.5" cap="ROUND" />
-                    </Line>
                 </PartDraw>
-                <PartImage x="10" y="8" width="14" height="14">
-                    <Image resource="[COMPLICATION.MONOCHROMATIC_IMAGE]" />
+                <PartImage x="12" y="10" width="14" height="14">
+                    <Variant mode="AMBIENT" target="alpha" value="0" />
+                    <Image resource="ic_copilot_sparkle" />
                 </PartImage>
-                <PartText x="28" y="7" width="54" height="15">
+                <PartText x="30" y="8" width="112" height="14">
                     <Text align="START">
-                        <Font family="SYNC_TO_DEVICE" size="10" weight="BOLD" color="#ffB388FF">
-                            <Template><![CDATA[STEPS]]></Template>
+                        <Font family="SYNC_TO_DEVICE" size="9" weight="BOLD" color="[CONFIGURATION.theme_color.0]">
+                            <Template><![CDATA[%s]]><Parameter expression="[COMPLICATION.TITLE]" /></Template>
                         </Font>
                     </Text>
                 </PartText>
-                <PartText x="2" y="21" width="90" height="26">
+                <PartText x="4" y="26" width="142" height="44">
                     <Text align="CENTER">
-                        <Font family="SYNC_TO_DEVICE" size="18" weight="BOLD" color="#ffFFFFFF">
+                        <Font family="SYNC_TO_DEVICE" size="22" weight="BOLD" color="#ffFFFFFF">
                             <Template><![CDATA[%s]]><Parameter expression="[COMPLICATION.TEXT]" /></Template>
                         </Font>
                     </Text>
                 </PartText>
             </Complication>
+
             <Complication type="EMPTY">
-                <PartDraw x="0" y="0" width="94" height="52">
-                    <RoundRectangle x="0" y="0" width="94" height="52" cornerRadiusX="14" cornerRadiusY="14">
+                <PartDraw x="0" y="0" width="150" height="78">
+                    <RoundRectangle x="0" y="0" width="150" height="78" cornerRadiusX="18" cornerRadiusY="18">
                         <Fill color="#E8080E1C" />
-                        <Stroke color="#80B388FF" thickness="1.5" />
+                        <Stroke color="[CONFIGURATION.theme_color.2]" thickness="1.5" />
                     </RoundRectangle>
-                    <Line startX="14" startY="1" endX="80" endY="1">
-                        <Stroke color="#50FFFFFF" thickness="1" cap="ROUND" />
-                    </Line>
-                    <Line startX="16" startY="47" endX="78" endY="47">
-                        <Stroke color="#ffB388FF" thickness="2.5" cap="ROUND" />
-                    </Line>
                 </PartDraw>
-                <PartImage x="10" y="8" width="14" height="14">
-                    <Image resource="ic_footsteps" />
+                <PartImage x="12" y="10" width="14" height="14">
+                    <Variant mode="AMBIENT" target="alpha" value="0" />
+                    <Image resource="ic_copilot_sparkle" />
                 </PartImage>
-                <PartText x="28" y="7" width="54" height="15">
+                <PartText x="30" y="8" width="112" height="14">
                     <Text align="START">
-                        <Font family="SYNC_TO_DEVICE" size="10" weight="BOLD" color="#ffB388FF">
-                            <Template><![CDATA[STEPS]]></Template>
+                        <Font family="SYNC_TO_DEVICE" size="9" weight="BOLD" color="[CONFIGURATION.theme_color.0]">
+                            <Template><![CDATA[AI CO-PILOT]]></Template>
                         </Font>
                     </Text>
                 </PartText>
-                <PartText x="2" y="21" width="90" height="26">
-                    <Text align="CENTER">
-                        <Font family="SYNC_TO_DEVICE" size="18" weight="BOLD" color="#ffFFFFFF">
-                            <Template><![CDATA[%d]]><Parameter expression="[STEP_COUNT] > 0 ? [STEP_COUNT] : 14248" /></Template>
+                <PartText x="8" y="24" width="136" height="48">
+                    <Text align="START">
+                        <Font family="SYNC_TO_DEVICE" size="10" weight="NORMAL" color="#80FFFFFF">
+                            <Template><![CDATA[Mission ready. Tap for briefing.]]></Template>
                         </Font>
                     </Text>
                 </PartText>
             </Complication>
         </ComplicationSlot>
 
-        <!-- ================================================================= -->
-        <!-- BOTTOM CLEARANCE ZONE (y = 337 to 450)                            -->
-        <!-- 114px unobstructed breathing room dedicated for Wear OS Now       -->
-        <!-- Playing media controller, call indicators, and system overlays    -->
-        <!-- ================================================================= -->
+        <!-- =============================================================
+             LAYER 8 — BOTTOM SENSOR PODS  (togglable via show_bottom_pods)
+             Slot 3: Heart Rate  |  Slot 4: Battery  |  Slot 5: Steps
+             Each pod uses a bottom progress bar in the theme colour.
+             ============================================================= -->
+        <Group name="bottom_pods" x="0" y="0" width="450" height="450">
+            <Condition>
+                <Expressions>
+                    <Expression name="pods_on"><![CDATA[[CONFIGURATION.show_bottom_pods]]]></Expression>
+                </Expressions>
+                <Compare expression="pods_on">
+
+                    <!-- SLOT 3 — Heart Rate / Pulse pod -->
+                    <ComplicationSlot
+                        slotId="3"
+                        displayName="@string/complication_heart_rate"
+                        supportedTypes="SHORT_TEXT RANGED_VALUE SMALL_IMAGE EMPTY"
+                        x="60" y="284" width="94" height="52">
+                        <BoundingBox x="0" y="0" width="94" height="52" />
+                        <DefaultProviderPolicy
+                            defaultSystemProvider="HEART_RATE"
+                            defaultSystemProviderType="SHORT_TEXT"
+                            primaryProvider="com.samsung.android.wear.shealth/.complications.heartrate.HeartrateComplicationProviderService"
+                            primaryProviderType="SHORT_TEXT" />
+                        <Complication type="SHORT_TEXT">
+                            <PartDraw x="2" y="3" width="94" height="52">
+                                <Variant mode="AMBIENT" target="alpha" value="0" />
+                                <RoundRectangle x="0" y="0" width="94" height="52" cornerRadiusX="14" cornerRadiusY="14">
+                                    <Fill color="#70000000" />
+                                </RoundRectangle>
+                            </PartDraw>
+                            <PartDraw x="0" y="0" width="94" height="52">
+                                <RoundRectangle x="0" y="0" width="94" height="52" cornerRadiusX="14" cornerRadiusY="14">
+                                    <Fill color="#E8080E1C" />
+                                    <Stroke color="#80FF3366" thickness="1.5" />
+                                </RoundRectangle>
+                                <Line startX="14" startY="1" endX="80" endY="1">
+                                    <Stroke color="#50FFFFFF" thickness="1" cap="ROUND" />
+                                </Line>
+                                <Line startX="16" startY="47" endX="78" endY="47">
+                                    <Stroke color="#ffFF3366" thickness="2.5" cap="ROUND" />
+                                </Line>
+                            </PartDraw>
+                            <PartImage x="10" y="8" width="14" height="14">
+                                <Variant mode="AMBIENT" target="alpha" value="0" />
+                                <Image resource="[COMPLICATION.MONOCHROMATIC_IMAGE]" />
+                            </PartImage>
+                            <PartText x="28" y="7" width="54" height="15">
+                                <Text align="START">
+                                    <Font family="SYNC_TO_DEVICE" size="10" weight="BOLD" color="#ffFF3366">
+                                        <Template><![CDATA[PULSE]]></Template>
+                                    </Font>
+                                </Text>
+                            </PartText>
+                            <PartText x="2" y="21" width="90" height="26">
+                                <Text align="CENTER">
+                                    <Font family="SYNC_TO_DEVICE" size="21" weight="BOLD" color="#ffFFFFFF">
+                                        <Variant mode="AMBIENT" target="color" value="#ffFFFFFF" />
+                                        <Template><![CDATA[%s]]><Parameter expression="[COMPLICATION.TEXT]" /></Template>
+                                    </Font>
+                                </Text>
+                            </PartText>
+                        </Complication>
+                        <Complication type="EMPTY">
+                            <PartDraw x="0" y="0" width="94" height="52">
+                                <RoundRectangle x="0" y="0" width="94" height="52" cornerRadiusX="14" cornerRadiusY="14">
+                                    <Fill color="#E8080E1C" />
+                                    <Stroke color="#80FF3366" thickness="1.5" />
+                                </RoundRectangle>
+                                <Line startX="16" startY="47" endX="78" endY="47">
+                                    <Stroke color="#ffFF3366" thickness="2.5" cap="ROUND" />
+                                </Line>
+                            </PartDraw>
+                            <PartImage x="10" y="8" width="14" height="14">
+                                <Variant mode="AMBIENT" target="alpha" value="0" />
+                                <Image resource="ic_heart" />
+                            </PartImage>
+                            <PartText x="28" y="7" width="54" height="15">
+                                <Text align="START">
+                                    <Font family="SYNC_TO_DEVICE" size="10" weight="BOLD" color="#ffFF3366">
+                                        <Template><![CDATA[PULSE]]></Template>
+                                    </Font>
+                                </Text>
+                            </PartText>
+                            <PartText x="2" y="21" width="90" height="26">
+                                <Text align="CENTER">
+                                    <Font family="SYNC_TO_DEVICE" size="21" weight="BOLD" color="#ffFFFFFF">
+                                        <Template><![CDATA[%d]]><Parameter expression="[HEART_RATE] > 0 ? round([HEART_RATE]) : 86" /></Template>
+                                    </Font>
+                                </Text>
+                            </PartText>
+                        </Complication>
+                    </ComplicationSlot>
+
+                    <!-- SLOT 4 — Battery pod -->
+                    <ComplicationSlot
+                        slotId="4"
+                        displayName="@string/complication_battery"
+                        supportedTypes="SHORT_TEXT RANGED_VALUE SMALL_IMAGE EMPTY"
+                        x="178" y="284" width="94" height="52">
+                        <BoundingBox x="0" y="0" width="94" height="52" />
+                        <DefaultProviderPolicy
+                            defaultSystemProvider="WATCH_BATTERY"
+                            defaultSystemProviderType="RANGED_VALUE" />
+                        <Complication type="RANGED_VALUE">
+                            <PartDraw x="2" y="3" width="94" height="52">
+                                <Variant mode="AMBIENT" target="alpha" value="0" />
+                                <RoundRectangle x="0" y="0" width="94" height="52" cornerRadiusX="14" cornerRadiusY="14">
+                                    <Fill color="#70000000" />
+                                </RoundRectangle>
+                            </PartDraw>
+                            <PartDraw x="0" y="0" width="94" height="52">
+                                <RoundRectangle x="0" y="0" width="94" height="52" cornerRadiusX="14" cornerRadiusY="14">
+                                    <Fill color="#E8080E1C" />
+                                    <Stroke color="[CONFIGURATION.theme_color.2]" thickness="1.5" />
+                                </RoundRectangle>
+                                <Line startX="14" startY="1" endX="80" endY="1">
+                                    <Stroke color="#50FFFFFF" thickness="1" cap="ROUND" />
+                                </Line>
+                                <Line startX="16" startY="47" endX="78" endY="47">
+                                    <Stroke color="#25FFFFFF" thickness="2.5" cap="ROUND" />
+                                </Line>
+                                <Line startX="16" startY="47"
+                                      endX="16 + clamp(([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) / ([COMPLICATION.RANGED_VALUE_MAX] - [COMPLICATION.RANGED_VALUE_MIN]), 0.0, 1.0) * 62.0"
+                                      endY="47">
+                                    <Stroke color="[CONFIGURATION.theme_color.0]" thickness="2.5" cap="ROUND" />
+                                </Line>
+                            </PartDraw>
+                            <PartImage x="10" y="8" width="14" height="14">
+                                <Variant mode="AMBIENT" target="alpha" value="0" />
+                                <Image resource="[COMPLICATION.MONOCHROMATIC_IMAGE]" />
+                            </PartImage>
+                            <PartText x="28" y="7" width="54" height="15">
+                                <Text align="START">
+                                    <Font family="SYNC_TO_DEVICE" size="10" weight="BOLD" color="[CONFIGURATION.theme_color.0]">
+                                        <Template><![CDATA[POWER]]></Template>
+                                    </Font>
+                                </Text>
+                            </PartText>
+                            <PartText x="2" y="21" width="90" height="26">
+                                <Text align="CENTER">
+                                    <Font family="SYNC_TO_DEVICE" size="21" weight="BOLD" color="#ffFFFFFF">
+                                        <Variant mode="AMBIENT" target="color" value="#ffFFFFFF" />
+                                        <Template><![CDATA[%s]]><Parameter expression="[COMPLICATION.TEXT]" /></Template>
+                                    </Font>
+                                </Text>
+                            </PartText>
+                        </Complication>
+                        <Complication type="EMPTY">
+                            <PartDraw x="0" y="0" width="94" height="52">
+                                <RoundRectangle x="0" y="0" width="94" height="52" cornerRadiusX="14" cornerRadiusY="14">
+                                    <Fill color="#E8080E1C" />
+                                    <Stroke color="[CONFIGURATION.theme_color.2]" thickness="1.5" />
+                                </RoundRectangle>
+                                <Line startX="16" startY="47"
+                                      endX="16 + clamp([BATTERY_PERCENT] / 100.0, 0.0, 1.0) * 62.0"
+                                      endY="47">
+                                    <Stroke color="[CONFIGURATION.theme_color.0]" thickness="2.5" cap="ROUND" />
+                                </Line>
+                            </PartDraw>
+                            <PartImage x="10" y="8" width="14" height="14">
+                                <Variant mode="AMBIENT" target="alpha" value="0" />
+                                <Image resource="ic_battery_bolt" />
+                            </PartImage>
+                            <PartText x="28" y="7" width="54" height="15">
+                                <Text align="START">
+                                    <Font family="SYNC_TO_DEVICE" size="10" weight="BOLD" color="[CONFIGURATION.theme_color.0]">
+                                        <Template><![CDATA[POWER]]></Template>
+                                    </Font>
+                                </Text>
+                            </PartText>
+                            <PartText x="2" y="21" width="90" height="26">
+                                <Text align="CENTER">
+                                    <Font family="SYNC_TO_DEVICE" size="21" weight="BOLD" color="#ffFFFFFF">
+                                        <Template><![CDATA[%d%%]]><Parameter expression="[BATTERY_PERCENT]" /></Template>
+                                    </Font>
+                                </Text>
+                            </PartText>
+                        </Complication>
+                    </ComplicationSlot>
+
+                    <!-- SLOT 5 — Daily Steps / Goal Progress pod -->
+                    <ComplicationSlot
+                        slotId="5"
+                        displayName="@string/complication_steps"
+                        supportedTypes="SHORT_TEXT RANGED_VALUE GOAL_PROGRESS SMALL_IMAGE EMPTY"
+                        x="296" y="284" width="94" height="52">
+                        <BoundingBox x="0" y="0" width="94" height="52" />
+                        <DefaultProviderPolicy
+                            defaultSystemProvider="STEP_COUNT"
+                            defaultSystemProviderType="SHORT_TEXT"
+                            primaryProvider="com.samsung.android.wear.shealth/.complications.steps.StepsComplicationProviderService"
+                            primaryProviderType="SHORT_TEXT" />
+                        <Complication type="GOAL_PROGRESS">
+                            <PartDraw x="2" y="3" width="94" height="52">
+                                <Variant mode="AMBIENT" target="alpha" value="0" />
+                                <RoundRectangle x="0" y="0" width="94" height="52" cornerRadiusX="14" cornerRadiusY="14">
+                                    <Fill color="#70000000" />
+                                </RoundRectangle>
+                            </PartDraw>
+                            <PartDraw x="0" y="0" width="94" height="52">
+                                <RoundRectangle x="0" y="0" width="94" height="52" cornerRadiusX="14" cornerRadiusY="14">
+                                    <Fill color="#E8080E1C" />
+                                    <Stroke color="#80B388FF" thickness="1.5" />
+                                </RoundRectangle>
+                                <Line startX="14" startY="1" endX="80" endY="1">
+                                    <Stroke color="#50FFFFFF" thickness="1" cap="ROUND" />
+                                </Line>
+                                <Line startX="16" startY="47" endX="78" endY="47">
+                                    <Stroke color="#25FFFFFF" thickness="2.5" cap="ROUND" />
+                                </Line>
+                                <Line startX="16" startY="47"
+                                      endX="16 + clamp([COMPLICATION.GOAL_PROGRESS_VALUE] / [COMPLICATION.GOAL_PROGRESS_TARGET_VALUE], 0.0, 1.0) * 62.0"
+                                      endY="47">
+                                    <Stroke color="#ffB388FF" thickness="2.5" cap="ROUND" />
+                                </Line>
+                            </PartDraw>
+                            <PartImage x="10" y="8" width="14" height="14">
+                                <Variant mode="AMBIENT" target="alpha" value="0" />
+                                <Image resource="[COMPLICATION.MONOCHROMATIC_IMAGE]" />
+                            </PartImage>
+                            <PartText x="28" y="7" width="54" height="15">
+                                <Text align="START">
+                                    <Font family="SYNC_TO_DEVICE" size="10" weight="BOLD" color="#ffB388FF">
+                                        <Template><![CDATA[STEPS]]></Template>
+                                    </Font>
+                                </Text>
+                            </PartText>
+                            <PartText x="2" y="21" width="90" height="26">
+                                <Text align="CENTER">
+                                    <Font family="SYNC_TO_DEVICE" size="18" weight="BOLD" color="#ffFFFFFF">
+                                        <Variant mode="AMBIENT" target="color" value="#ffFFFFFF" />
+                                        <Template><![CDATA[%s]]><Parameter expression="[COMPLICATION.TEXT]" /></Template>
+                                    </Font>
+                                </Text>
+                            </PartText>
+                        </Complication>
+                        <Complication type="SHORT_TEXT">
+                            <PartDraw x="0" y="0" width="94" height="52">
+                                <RoundRectangle x="0" y="0" width="94" height="52" cornerRadiusX="14" cornerRadiusY="14">
+                                    <Fill color="#E8080E1C" />
+                                    <Stroke color="#80B388FF" thickness="1.5" />
+                                </RoundRectangle>
+                                <Line startX="16" startY="47" endX="78" endY="47">
+                                    <Stroke color="#ffB388FF" thickness="2.5" cap="ROUND" />
+                                </Line>
+                            </PartDraw>
+                            <PartImage x="10" y="8" width="14" height="14">
+                                <Variant mode="AMBIENT" target="alpha" value="0" />
+                                <Image resource="[COMPLICATION.MONOCHROMATIC_IMAGE]" />
+                            </PartImage>
+                            <PartText x="28" y="7" width="54" height="15">
+                                <Text align="START">
+                                    <Font family="SYNC_TO_DEVICE" size="10" weight="BOLD" color="#ffB388FF">
+                                        <Template><![CDATA[STEPS]]></Template>
+                                    </Font>
+                                </Text>
+                            </PartText>
+                            <PartText x="2" y="21" width="90" height="26">
+                                <Text align="CENTER">
+                                    <Font family="SYNC_TO_DEVICE" size="18" weight="BOLD" color="#ffFFFFFF">
+                                        <Template><![CDATA[%s]]><Parameter expression="[COMPLICATION.TEXT]" /></Template>
+                                    </Font>
+                                </Text>
+                            </PartText>
+                        </Complication>
+                        <Complication type="EMPTY">
+                            <PartDraw x="0" y="0" width="94" height="52">
+                                <RoundRectangle x="0" y="0" width="94" height="52" cornerRadiusX="14" cornerRadiusY="14">
+                                    <Fill color="#E8080E1C" />
+                                    <Stroke color="#80B388FF" thickness="1.5" />
+                                </RoundRectangle>
+                                <Line startX="16" startY="47"
+                                      endX="16 + clamp([STEP_COUNT] / 10000.0, 0.0, 1.0) * 62.0"
+                                      endY="47">
+                                    <Stroke color="#ffB388FF" thickness="2.5" cap="ROUND" />
+                                </Line>
+                            </PartDraw>
+                            <PartImage x="10" y="8" width="14" height="14">
+                                <Variant mode="AMBIENT" target="alpha" value="0" />
+                                <Image resource="ic_footsteps" />
+                            </PartImage>
+                            <PartText x="28" y="7" width="54" height="15">
+                                <Text align="START">
+                                    <Font family="SYNC_TO_DEVICE" size="10" weight="BOLD" color="#ffB388FF">
+                                        <Template><![CDATA[STEPS]]></Template>
+                                    </Font>
+                                </Text>
+                            </PartText>
+                            <PartText x="2" y="21" width="90" height="26">
+                                <Text align="CENTER">
+                                    <Font family="SYNC_TO_DEVICE" size="18" weight="BOLD" color="#ffFFFFFF">
+                                        <Template><![CDATA[%d]]><Parameter expression="[STEP_COUNT] > 0 ? [STEP_COUNT] : 0" /></Template>
+                                    </Font>
+                                </Text>
+                            </PartText>
+                        </Complication>
+                    </ComplicationSlot>
+
+                </Compare>
+            </Condition>
+        </Group>
 
     </Scene>
 </WatchFace>

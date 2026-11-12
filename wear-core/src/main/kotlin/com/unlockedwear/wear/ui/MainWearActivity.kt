@@ -1,5 +1,7 @@
 package com.unlockedwear.wear.ui
 
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -12,6 +14,7 @@ import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import com.unlockedwear.wear.data.RingStateDataStore
 import com.unlockedwear.wear.data.WatchFaceConfigDataStore
 import com.unlockedwear.wear.data.WearDatabase
+import com.unlockedwear.wear.service.SensorForegroundService
 import com.unlockedwear.wear.sensors.HeartRateManager
 import com.unlockedwear.wear.sensors.SamsungSdkInitializer
 import com.unlockedwear.wear.sensors.SpO2Manager
@@ -76,6 +79,15 @@ class MainWearActivity : ComponentActivity() {
 
         // Ensure Samsung Health Tracking service is initialized
         sdkInitializer.initialize()
+
+        // Start continuous sensor → phone streaming foreground service
+        val sensorServiceIntent = SensorForegroundService.startIntent(this)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(sensorServiceIntent)
+        } else {
+            startService(sensorServiceIntent)
+        }
+        Log.i(TAG, "SensorForegroundService start requested")
 
         val initialRoute = intent.getStringExtra(EXTRA_ROUTE) ?: ROUTE_HOME
 

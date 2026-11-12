@@ -94,15 +94,20 @@ class SensorRepository @Inject constructor(
     }
 
     /**
-     * Persists a newly acquired [ThermalFrame] reading.
+     * Persists a newly acquired [ThermalFrame] reading with optional pre-computed
+     * baseline deviation and z-score (computed on-watch by [UnlockedThermalManager]).
      */
-    suspend fun insertThermalReading(frame: ThermalFrame) {
+    suspend fun insertThermalReading(
+        frame: ThermalFrame,
+        deltaFromBaseline: Float = 0f,
+        thermalZScore: Double = 0.0
+    ) {
         val entity = ThermalReadingEntity(
-            skinTemp = frame.skinTempCelsius,
-            ambientTemp = frame.ambientTempCelsius,
-            compensatedTemp = frame.compensatedTempCelsius,
-            thermalZScore = 0.0,
-            timestampMs = frame.timestampMs
+            skinTemp           = frame.skinTempCelsius,
+            ambientTemp        = frame.ambientTempCelsius,
+            compensatedTemp    = frame.compensatedTempCelsius,
+            thermalZScore      = thermalZScore,
+            timestampMs        = frame.timestampMs
         )
         thermalDao.insert(entity)
     }

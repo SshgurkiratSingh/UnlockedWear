@@ -11,7 +11,6 @@ import com.unlockedwear.mobile.weather.WeatherService
 import com.unlockedwear.protocol.BiometricSnapshot
 import com.unlockedwear.protocol.DailyBriefing
 import com.unlockedwear.protocol.RingMode
-import com.unlockedwear.protocol.ThermalFrame
 import com.unlockedwear.protocol.WeatherState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -23,7 +22,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.Locale
 import javax.inject.Inject
-import kotlin.random.Random
 
 /**
  * State representing watch connection status on Galaxy S25.
@@ -150,26 +148,19 @@ class DashboardViewModel @Inject constructor(
         viewModelScope.launch {
             _isMeasuringTemp.value = true
             _statusMessage.value = "Requesting thermal sweep from Galaxy Watch 8..."
-            phoneToWatchSyncer.requestOnDemandTemperatureMeasurement()
-            delay(600L)
-
-            val currentSkin = latestBiometrics.value.skinTempCelsius
-            val baseTemp = if (currentSkin in 20.0f..42.0f) currentSkin else 33.6f
-            val variation = (Random.nextFloat() * 0.6f) - 0.3f
-            val newTemp = (baseTemp + variation).coerceIn(32.0f, 38.0f)
-            val newZScore = ((newTemp - 33.8f) / 0.8f).toDouble()
-
-            val frame = ThermalFrame(
-                skinTempCelsius = newTemp,
-                ambientTempCelsius = 24.0f,
-                compensatedTempCelsius = newTemp,
-                timestampMs = System.currentTimeMillis(),
-                status = 1
-            )
-            sensorRepository.insertThermalReading(frame)
-
+            val sent = phoneToWatchSyncer.requestOnDemandTemperatureMeasurement()
+            if (!sent) {
+                _statusMessage.value = "Watch not connected — connect Galaxy Watch 8 first"
+                _isMeasuringTemp.value = false
+                return@launch
+            }
+            // The actual reading will arrive asynchronously via WatchDataListenerService →
+            // SensorRepository → latestBiometrics StateFlow. We just show a pending message
+            // and clear the spinner after a reasonable measurement window.
+            _statusMessage.value = "Measuring… results will appear in a few seconds"
+            delay(8_000L)
             _isMeasuringTemp.value = false
-            _statusMessage.value = String.format(Locale.US, "Temp measured: %.1f°C (Z: %+.2f)", newTemp, newZScore)
+            _statusMessage.value = null
         }
     }
 

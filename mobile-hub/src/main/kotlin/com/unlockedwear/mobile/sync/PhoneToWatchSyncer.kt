@@ -204,22 +204,48 @@ class PhoneToWatchSyncer @Inject constructor(
 
     /**
      * Requests an immediate on-demand temperature measurement sweep from the connected Galaxy Watch 8.
-     *
-     * @return `true` if the trigger command was dispatched successfully, `false` otherwise.
      */
     suspend fun requestOnDemandTemperatureMeasurement(): Boolean {
         return try {
             val nodes = nodeClient.connectedNodes.await()
             val payload = "READ_TEMP_NOW".toByteArray(Charsets.UTF_8)
             for (node in nodes) {
-                try {
-                    messageClient.sendMessage(node.id, DataLayerPaths.COMMAND_READ_TEMP, payload).await()
-                } catch (_: Exception) {
-                }
+                try { messageClient.sendMessage(node.id, DataLayerPaths.COMMAND_READ_TEMP, payload).await() } catch (_: Exception) {}
             }
             true
-        } catch (_: Exception) {
-            false
-        }
+        } catch (_: Exception) { false }
+    }
+
+    /**
+     * Pushes extended watch face feature flags to Galaxy Watch 8 via
+     * [DataLayerPaths.CONFIG_SYNC_FEATURES].
+     *
+     * @param flags [WatchFaceFeatureFlags] data class — all boolean feature toggles.
+     * @return `true` if dispatched successfully.
+     */
+    suspend fun pushWatchFaceFeatureFlags(flags: com.unlockedwear.protocol.WatchFaceFeatureFlags): Boolean {
+        return try {
+            val putDataMapReq = PutDataMapRequest.create(DataLayerPaths.CONFIG_SYNC_FEATURES)
+            with(putDataMapReq.dataMap) {
+                putBoolean("bioReactiveArc",  flags.bioReactiveArc)
+                putBoolean("hrvBand",         flags.hrvBand)
+                putBoolean("circadianSector", flags.circadianSector)
+                putBoolean("thermalStrip",    flags.thermalStrip)
+                putBoolean("coPilotTicker",   flags.coPilotTicker)
+                putBoolean("uvZoneArc",       flags.uvZoneArc)
+                putBoolean("recoveryScore",   flags.recoveryScore)
+                putBoolean("focusCountdown",  flags.focusCountdown)
+                putLong("updatedAt", System.currentTimeMillis())
+                // Also carry JSON for message path
+                putString("json", json.encodeToString(flags))
+            }
+            dataClient.putDataItem(putDataMapReq.asPutDataRequest().setUrgent()).await()
+            // Direct message to all connected nodes
+            val payload = json.encodeToString(flags).toByteArray(Charsets.UTF_8)
+            nodeClient.connectedNodes.await().forEach { node ->
+                try { messageClient.sendMessage(node.id, DataLayerPaths.CONFIG_SYNC_FEATURES, payload).await() } catch (_: Exception) {}
+            }
+            true
+        } catch (_: Exception) { false }
     }
 }

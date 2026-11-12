@@ -54,6 +54,12 @@ object DataLayerPaths {
     const val CONFIG_SYNC = "/unlockedwear/config/sync"
 
     /**
+     * Path for extended watch face feature flags (biometric reactivity, circadian, HRV band, etc.)
+     * Carries a JSON payload of [WatchFaceFeatureFlags].
+     */
+    const val CONFIG_SYNC_FEATURES = "/unlockedwear/config/sync_features"
+
+    /**
      * Path for commanding an immediate on-demand temperature measurement sweep from mobile to watch.
      */
     const val COMMAND_READ_TEMP = "/unlockedwear/command/read_temp"
