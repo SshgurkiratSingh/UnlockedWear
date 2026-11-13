@@ -219,6 +219,29 @@ fun HomeScreen(
                         color = accentColor.copy(alpha = 0.8f),
                         letterSpacing = 1.sp
                     )
+                    if (watchFaceConfig.complicationSlots.size > 2) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            watchFaceConfig.complicationSlots.drop(2).take(4).forEach { slot ->
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(SpaceCardSurface)
+                                        .padding(horizontal = 5.dp, vertical = 3.dp)
+                                ) {
+                                    Text(
+                                        text = slot.uppercase(),
+                                        style = MaterialTheme.typography.caption2,
+                                        color = TextPrimary,
+                                        maxLines = 1
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
 

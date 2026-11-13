@@ -45,6 +45,7 @@ data class WatchFaceConfig(
     val accentColorHex: String = "#3B82F6",
     val topComplication: String = "Heart Rate (BPM)",
     val bottomComplication: String = "UV Index",
+    val complicationSlots: List<String> = listOf("Heart Rate (BPM)", "UV Index"),
     val dialStyle: String = "Digital Modern",
     val ringMode: RingMode = RingMode.HEALTH,
     // ── Feature flags ─────────────────────────────────────────────────────
@@ -79,6 +80,7 @@ class WatchFaceConfigDataStore @Inject constructor(
         val KEY_ACCENT_COLOR        = stringPreferencesKey("wf_accent_color")
         val KEY_TOP_COMPLICATION    = stringPreferencesKey("wf_top_complication")
         val KEY_BOTTOM_COMPLICATION = stringPreferencesKey("wf_bottom_complication")
+        val KEY_COMPLICATION_SLOTS = stringPreferencesKey("wf_complication_slots")
         val KEY_DIAL_STYLE          = stringPreferencesKey("wf_dial_style")
         val KEY_RING_MODE           = stringPreferencesKey("wf_ring_mode")
         // Feature flag keys
@@ -102,6 +104,9 @@ class WatchFaceConfigDataStore @Inject constructor(
                 accentColorHex     = p[KEY_ACCENT_COLOR]        ?: "#3B82F6",
                 topComplication    = p[KEY_TOP_COMPLICATION]     ?: "Heart Rate (BPM)",
                 bottomComplication = p[KEY_BOTTOM_COMPLICATION]  ?: "UV Index",
+                complicationSlots  = (p[KEY_COMPLICATION_SLOTS] ?: "")
+                    .split("||").filter { it.isNotBlank() }
+                    .ifEmpty { listOf(p[KEY_TOP_COMPLICATION] ?: "Heart Rate (BPM)", p[KEY_BOTTOM_COMPLICATION] ?: "UV Index") },
                 dialStyle          = p[KEY_DIAL_STYLE]           ?: "Digital Modern",
                 ringMode           = ringMode,
                 bioReactiveArc     = p[KEY_BIO_REACTIVE_ARC]    ?: true,
@@ -124,7 +129,8 @@ class WatchFaceConfigDataStore @Inject constructor(
         topComplication: String,
         bottomComplication: String,
         dialStyle: String,
-        ringMode: RingMode
+        ringMode: RingMode,
+        complicationSlots: List<String> = listOf(topComplication, bottomComplication)
     ) {
         context.watchFaceConfigDataStore.edit { p ->
             p[KEY_ACCENT_COLOR]        = accentColorHex
@@ -132,6 +138,7 @@ class WatchFaceConfigDataStore @Inject constructor(
             p[KEY_BOTTOM_COMPLICATION] = bottomComplication
             p[KEY_DIAL_STYLE]          = dialStyle
             p[KEY_RING_MODE]           = ringMode.name
+            p[KEY_COMPLICATION_SLOTS]  = complicationSlots.joinToString("||")
         }
     }
 

@@ -193,24 +193,28 @@ class DataSyncService : WearableListenerService() {
             }
 
             DataLayerPaths.CONFIG_SYNC -> {
-                // Pipe-delimited payload: "ringMode|accentColorHex|topComplication|bottomComplication|dialStyle"
+                // Pipe-delimited payload with an optional custom slot list.
                 serviceScope.launch {
                     try {
                         val payload = String(data, Charsets.UTF_8)
                         val parts = payload.split("|")
-                        if (parts.size == 5) {
+                        if (parts.size >= 5) {
                             val ringMode = try { RingMode.valueOf(parts[0]) } catch (_: Exception) { RingMode.HEALTH }
                             val accentColorHex  = parts[1]
                             val topComplication = parts[2]
                             val bottomComplication = parts[3]
                             val dialStyle = parts[4]
+                            val complicationSlots = parts.getOrNull(5)?.split("||")?.filter { it.isNotBlank() }
+                                ?.ifEmpty { listOf(topComplication, bottomComplication) }
+                                ?: listOf(topComplication, bottomComplication)
 
                             watchFaceConfigDataStore.applyConfig(
                                 accentColorHex     = accentColorHex,
                                 topComplication    = topComplication,
                                 bottomComplication = bottomComplication,
                                 dialStyle          = dialStyle,
-                                ringMode           = ringMode
+                                ringMode           = ringMode,
+                                complicationSlots  = complicationSlots
                             )
                             // Keep ring-gauge DataStore in sync with the new mode
                             ringStateDataStore.setRingMode(ringMode)
@@ -319,6 +323,8 @@ class DataSyncService : WearableListenerService() {
                             val topComplication    = map.getString("topComplication", "Heart Rate (BPM)") ?: "Heart Rate (BPM)"
                             val bottomComplication = map.getString("bottomComplication", "UV Index") ?: "UV Index"
                             val dialStyle          = map.getString("dialStyle", "Digital Modern") ?: "Digital Modern"
+                            val complicationSlots = (map.getString("complicationSlots", "") ?: "")
+                                .split("||").filter { it.isNotBlank() }
                             val ringMode = try { RingMode.valueOf(ringModeStr) } catch (_: Exception) { RingMode.HEALTH }
 
                             watchFaceConfigDataStore.applyConfig(
@@ -326,7 +332,8 @@ class DataSyncService : WearableListenerService() {
                                 topComplication    = topComplication,
                                 bottomComplication = bottomComplication,
                                 dialStyle          = dialStyle,
-                                ringMode           = ringMode
+                                ringMode           = ringMode,
+                                complicationSlots  = complicationSlots.ifEmpty { listOf(topComplication, bottomComplication) }
                             )
                             ringStateDataStore.setRingMode(ringMode)
                             MissionRingComplicationService.triggerImmediateRefresh(applicationContext)

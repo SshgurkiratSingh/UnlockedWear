@@ -39,6 +39,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -137,6 +138,9 @@ fun WatchFaceCustomizationScreen(
 
     var isTopExpanded by remember { mutableStateOf(false) }
     var isBottomExpanded by remember { mutableStateOf(false) }
+    var customSlotName by remember { mutableStateOf("") }
+    var glassDepth by remember { mutableStateOf(0.72f) }
+    var timeLayout by remember { mutableStateOf("24H") }
 
     val activeAccentColor by animateColorAsState(
         targetValue = try { Color(android.graphics.Color.parseColor(uiState.accentColorHex)) }
@@ -202,8 +206,22 @@ fun WatchFaceCustomizationScreen(
 
                 Box(
                     modifier = Modifier.size(220.dp).clip(CircleShape)
-                        .background(Color(0xFF050508))
-                        .border(3.dp, activeAccentColor.copy(alpha = 0.6f), CircleShape),
+                        .background(
+                            Brush.radialGradient(
+                                listOf(
+                                    activeAccentColor.copy(alpha = 0.10f + glassDepth * 0.2f),
+                                    Color(0xFF10131F),
+                                    Color(0xFF030407)
+                                )
+                            )
+                        )
+                        .border(
+                            3.dp,
+                            Brush.sweepGradient(
+                                listOf(activeAccentColor, Color.White.copy(alpha = 0.18f), activeAccentColor.copy(alpha = 0.2f))
+                            ),
+                            CircleShape
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Canvas(Modifier.fillMaxSize()) {
@@ -333,13 +351,25 @@ fun WatchFaceCustomizationScreen(
                                 }
                             }
                             "Telemetry Gauge" -> {
-                                Text("10:08", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold,
+                                Text(
+                                    when (timeLayout) {
+                                        "12H" -> "10:08 PM"
+                                        "MINIMAL" -> "10 08"
+                                        else -> "22:08"
+                                    },
+                                    fontSize = 30.sp, fontWeight = FontWeight.ExtraBold,
                                     color = TextPrimary, fontFamily = FontFamily.Monospace, letterSpacing = 2.sp)
                                 Text(uiState.ringMode.label.uppercase(), fontSize = 7.sp,
                                     color = activeAccentColor, fontFamily = FontFamily.Monospace)
                             }
                             else -> {
-                                Text("10:08", fontSize = 34.sp, fontWeight = FontWeight.Bold,
+                                Text(
+                                    when (timeLayout) {
+                                        "12H" -> "10:08 PM"
+                                        "MINIMAL" -> "10 08"
+                                        else -> "22:08"
+                                    },
+                                    fontSize = 34.sp, fontWeight = FontWeight.Bold,
                                     color = TextPrimary, fontFamily = FontFamily.Monospace)
                             }
                         }
@@ -493,21 +523,139 @@ fun WatchFaceCustomizationScreen(
             }
         }
 
-        // ── 5. DIAL LAYOUT ───────────────────────────────────────────────────
-        SectionCard(title = "DIAL LAYOUT", accent = activeAccentColor) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                DialStyles.forEach { style ->
+        // ── 4B. FREEFORM COMPOSITION ────────────────────────────────────────
+        SectionCard(title = "FREEFORM COMPOSITION", accent = activeAccentColor) {
+            Text(
+                "Choose up to six live tiles. The watch face keeps their order and renders them as glass capsules.",
+                fontSize = 10.sp, color = TextSecondary
+            )
+            Spacer(Modifier.height(10.dp))
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                uiState.complicationSlots.forEach { slot ->
+                    Box(
+                        modifier = Modifier.clip(RoundedCornerShape(12.dp))
+                            .background(activeAccentColor.copy(alpha = 0.18f))
+                            .border(1.dp, activeAccentColor.copy(alpha = 0.55f), RoundedCornerShape(12.dp))
+                            .clickable {
+                                viewModel.setComplicationSlots(uiState.complicationSlots - slot)
+                            }
+                            .padding(horizontal = 10.dp, vertical = 7.dp)
+                    ) {
+                        Text("× $slot", fontSize = 11.sp, color = TextPrimary)
+                    }
+                }
+            }
+            Spacer(Modifier.height(10.dp))
+            OutlinedTextField(
+                value = customSlotName,
+                onValueChange = { customSlotName = it.take(22) },
+                singleLine = true,
+                label = { Text("Add custom tile") },
+                placeholder = { Text("e.g. Next meeting") },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = DeepIndigoSurface,
+                    unfocusedContainerColor = DeepIndigoSurface,
+                    focusedTextColor = TextPrimary,
+                    unfocusedTextColor = TextPrimary,
+                    focusedBorderColor = activeAccentColor,
+                    unfocusedBorderColor = Color.White.copy(alpha = 0.12f),
+                    focusedLabelColor = activeAccentColor,
+                    unfocusedLabelColor = TextSecondary
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(Modifier.height(8.dp))
+            Button(
+                onClick = {
+                    val name = customSlotName.trim()
+                    if (name.isNotEmpty() && uiState.complicationSlots.size < 6) {
+                        viewModel.setComplicationSlots(uiState.complicationSlots + name)
+                        customSlotName = ""
+                    }
+                },
+                enabled = customSlotName.isNotBlank() && uiState.complicationSlots.size < 6,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = activeAccentColor,
+                    contentColor = SpaceBlack,
+                    disabledContainerColor = DeepIndigoSurface,
+                    disabledContentColor = TextSecondary
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(if (uiState.complicationSlots.size < 6) "ADD TILE" else "SIX TILES MAX", fontWeight = FontWeight.Bold)
+            }
+            Spacer(Modifier.height(10.dp))
+            Text("QUICK INSERT", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = TextSecondary)
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                ComplicationOptions.filterNot { it in uiState.complicationSlots }.forEach { option ->
                     FilterChip(
-                        selected = uiState.dialStyle == style,
-                        onClick = { viewModel.setDialStyle(style) },
-                        label = { Text(style, fontSize = 10.sp) },
+                        selected = false,
+                        onClick = {
+                            if (uiState.complicationSlots.size < 6) {
+                                viewModel.setComplicationSlots(uiState.complicationSlots + option)
+                            }
+                        },
+                        label = { Text("+ $option", fontSize = 10.sp) },
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = activeAccentColor, selectedLabelColor = SpaceBlack,
-                            containerColor = DeepIndigoSurface, labelColor = TextPrimary
-                        ),
-                        modifier = Modifier.weight(1f)
+                            containerColor = DeepIndigoSurface,
+                            labelColor = TextSecondary
+                        )
                     )
                 }
+            }
+        }
+
+        // ── 5. DIAL LAYOUT ───────────────────────────────────────────────────
+        SectionCard(title = "DIAL LAYOUT", accent = activeAccentColor) {
+            Column {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    DialStyles.forEach { style ->
+                        FilterChip(
+                            selected = uiState.dialStyle == style,
+                            onClick = { viewModel.setDialStyle(style) },
+                            label = { Text(style, fontSize = 10.sp) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = activeAccentColor, selectedLabelColor = SpaceBlack,
+                                containerColor = DeepIndigoSurface, labelColor = TextPrimary
+                            ),
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+                Spacer(Modifier.height(12.dp))
+                Text("TIME LAYOUT", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = TextSecondary)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf("12H", "24H", "MINIMAL").forEach { layout ->
+                        FilterChip(
+                            selected = timeLayout == layout,
+                            onClick = { timeLayout = layout },
+                            label = { Text(layout, fontSize = 10.sp) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = activeAccentColor,
+                                selectedLabelColor = SpaceBlack,
+                                containerColor = DeepIndigoSurface,
+                                labelColor = TextPrimary
+                            )
+                        )
+                    }
+                }
+                Spacer(Modifier.height(10.dp))
+                Text("GLASS DEPTH", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = TextSecondary)
+                Slider(
+                    value = glassDepth,
+                    onValueChange = { glassDepth = it },
+                    colors = androidx.compose.material3.SliderDefaults.colors(
+                        thumbColor = activeAccentColor,
+                        activeTrackColor = activeAccentColor,
+                        inactiveTrackColor = DeepIndigoSurface
+                    )
+                )
             }
         }
 
