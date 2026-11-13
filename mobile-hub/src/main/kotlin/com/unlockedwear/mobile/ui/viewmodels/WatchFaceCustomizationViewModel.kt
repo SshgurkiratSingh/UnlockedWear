@@ -19,6 +19,7 @@ data class WatchFaceUiState(
     val accentColorHex: String = "#3B82F6",
     val topComplication: String = "Heart Rate (BPM)",
     val bottomComplication: String = "UV Index",
+    val complicationSlots: List<String> = listOf("Heart Rate (BPM)", "UV Index"),
     val dialStyle: String = "Digital Modern",
     // ── Feature flags ─────────────────────────────────────────────────────
     val bioReactiveArc: Boolean = true,
@@ -72,6 +73,7 @@ class WatchFaceCustomizationViewModel @Inject constructor(
         accentColorHex     = appPreferences.getWatchFaceAccentColor(),
         topComplication    = appPreferences.getWatchFaceTopComplication(),
         bottomComplication = appPreferences.getWatchFaceBottomComplication(),
+        complicationSlots   = appPreferences.getWatchFaceComplicationSlots(),
         dialStyle          = appPreferences.getWatchFaceDialStyle(),
         bioReactiveArc     = appPreferences.getWatchFaceBioReactiveArc(),
         hrvBand            = appPreferences.getWatchFaceHrvBand(),
@@ -96,13 +98,37 @@ class WatchFaceCustomizationViewModel @Inject constructor(
     }
 
     fun setTopComplication(c: String) {
-        _uiState.value = _uiState.value.copy(topComplication = c)
+        val slots = _uiState.value.complicationSlots.toMutableList().apply {
+            if (isEmpty()) add(c) else set(0, c)
+        }
+        _uiState.value = _uiState.value.copy(topComplication = c, complicationSlots = slots)
         appPreferences.setWatchFaceTopComplication(c)
+        appPreferences.setWatchFaceComplicationSlots(slots)
     }
 
     fun setBottomComplication(c: String) {
-        _uiState.value = _uiState.value.copy(bottomComplication = c)
+        val slots = _uiState.value.complicationSlots.toMutableList().apply {
+            when {
+                isEmpty() -> addAll(listOf("None", c))
+                size == 1 -> add(c)
+                else -> set(1, c)
+            }
+        }
+        _uiState.value = _uiState.value.copy(bottomComplication = c, complicationSlots = slots)
         appPreferences.setWatchFaceBottomComplication(c)
+        appPreferences.setWatchFaceComplicationSlots(slots)
+    }
+
+    fun setComplicationSlots(slots: List<String>) {
+        val normalized = slots.map { it.replace("|", "").trim() }.filter { it.isNotBlank() }.distinct().take(6)
+        _uiState.value = _uiState.value.copy(
+            complicationSlots = normalized,
+            topComplication = normalized.firstOrNull() ?: "None",
+            bottomComplication = normalized.getOrNull(1) ?: "None"
+        )
+        appPreferences.setWatchFaceComplicationSlots(normalized)
+        normalized.firstOrNull()?.let(appPreferences::setWatchFaceTopComplication)
+        normalized.getOrNull(1)?.let(appPreferences::setWatchFaceBottomComplication)
     }
 
     fun setDialStyle(style: String) {
@@ -136,7 +162,8 @@ class WatchFaceCustomizationViewModel @Inject constructor(
                 accentColorHex     = s.accentColorHex,
                 topComplication    = s.topComplication,
                 bottomComplication = s.bottomComplication,
-                dialStyle          = s.dialStyle
+                dialStyle          = s.dialStyle,
+                complicationSlots  = s.complicationSlots
             )
             val flagsOk = phoneToWatchSyncer.pushWatchFaceFeatureFlags(s.toFeatureFlags())
             val success = baseOk && flagsOk

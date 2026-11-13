@@ -115,6 +115,16 @@ class AppPreferences @Inject constructor(
         prefs.edit().putString(KEY_WF_BOTTOM_COMPLICATION, complication).apply()
     }
 
+    fun getWatchFaceComplicationSlots(): List<String> =
+        (prefs.getString(KEY_WF_COMPLICATION_SLOTS, "") ?: "")
+            .split("||")
+            .filter { it.isNotBlank() }
+            .ifEmpty { listOf(getWatchFaceTopComplication(), getWatchFaceBottomComplication()) }
+
+    fun setWatchFaceComplicationSlots(slots: List<String>) {
+        prefs.edit().putString(KEY_WF_COMPLICATION_SLOTS, slots.joinToString("||")).apply()
+    }
+
     fun getWatchFaceDialStyle(): String =
         prefs.getString(KEY_WF_DIAL_STYLE, "Digital Modern") ?: "Digital Modern"
 
@@ -162,6 +172,7 @@ class AppPreferences @Inject constructor(
         private const val KEY_WF_ACCENT_COLOR        = "wf_accent_color"
         private const val KEY_WF_TOP_COMPLICATION    = "wf_top_complication"
         private const val KEY_WF_BOTTOM_COMPLICATION = "wf_bottom_complication"
+        private const val KEY_WF_COMPLICATION_SLOTS = "wf_complication_slots"
         private const val KEY_WF_DIAL_STYLE          = "wf_dial_style"
         // Feature flags
         private const val KEY_WF_BIO_REACTIVE_ARC   = "wf_bio_reactive_arc"

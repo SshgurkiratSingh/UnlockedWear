@@ -171,7 +171,8 @@ class PhoneToWatchSyncer @Inject constructor(
         accentColorHex: String,
         topComplication: String,
         bottomComplication: String,
-        dialStyle: String
+        dialStyle: String,
+        complicationSlots: List<String> = listOf(topComplication, bottomComplication)
     ): Boolean {
         return try {
             val putDataMapReq = PutDataMapRequest.create(DataLayerPaths.CONFIG_SYNC)
@@ -182,13 +183,14 @@ class PhoneToWatchSyncer @Inject constructor(
             dataMap.putString("topComplication", topComplication)
             dataMap.putString("bottomComplication", bottomComplication)
             dataMap.putString("dialStyle", dialStyle)
+            dataMap.putString("complicationSlots", complicationSlots.joinToString("||"))
             dataMap.putLong("updatedAt", System.currentTimeMillis())
 
             val putDataReq = putDataMapReq.asPutDataRequest().setUrgent()
             dataClient.putDataItem(putDataReq).await()
 
             // Also send direct trigger to connected nodes
-            val payload = "$ringMode|$accentColorHex|$topComplication|$bottomComplication|$dialStyle".toByteArray(Charsets.UTF_8)
+            val payload = "$ringMode|$accentColorHex|$topComplication|$bottomComplication|$dialStyle|${complicationSlots.joinToString("||")}".toByteArray(Charsets.UTF_8)
             val nodes = nodeClient.connectedNodes.await()
             for (node in nodes) {
                 try {

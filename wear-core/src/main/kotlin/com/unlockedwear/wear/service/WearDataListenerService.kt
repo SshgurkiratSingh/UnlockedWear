@@ -56,6 +56,8 @@ class WearDataListenerService : WearableListenerService() {
                             val topComplication    = map.getString("topComplication", "Heart Rate (BPM)") ?: "Heart Rate (BPM)"
                             val bottomComplication = map.getString("bottomComplication", "UV Index") ?: "UV Index"
                             val dialStyle          = map.getString("dialStyle", "Digital Modern") ?: "Digital Modern"
+                            val complicationSlots = (map.getString("complicationSlots", "") ?: "")
+                                .split("||").filter { it.isNotBlank() }
                             val ringMode = try { RingMode.valueOf(ringModeStr) } catch (_: Exception) { RingMode.HEALTH }
 
                             watchFaceConfigDataStore.applyConfig(
@@ -63,7 +65,8 @@ class WearDataListenerService : WearableListenerService() {
                                 topComplication    = topComplication,
                                 bottomComplication = bottomComplication,
                                 dialStyle          = dialStyle,
-                                ringMode           = ringMode
+                                ringMode           = ringMode,
+                                complicationSlots  = complicationSlots.ifEmpty { listOf(topComplication, bottomComplication) }
                             )
                             ringStateDataStore.setRingMode(ringMode)
                             MissionRingComplicationService.triggerImmediateRefresh(applicationContext)
