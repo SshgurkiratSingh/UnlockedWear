@@ -36,6 +36,7 @@ import com.unlockedwear.mobile.ui.components.UberMuted
 import com.unlockedwear.mobile.ui.components.UberWhite
 import com.unlockedwear.mobile.ui.screens.DashboardScreen
 import com.unlockedwear.mobile.ui.screens.SettingsScreen
+import com.unlockedwear.mobile.ui.screens.ProximityLabScreen
 import com.unlockedwear.mobile.ui.screens.WatchFaceCustomizationScreen
 import com.unlockedwear.mobile.ui.theme.UnlockedTheme
 import com.unlockedwear.mobile.ui.viewmodels.DashboardViewModel
@@ -50,6 +51,7 @@ sealed class Screen(val route: String, val title: String, val badgeText: String)
     data object Dashboard : Screen("dashboard", "Dashboard", "DASH")
     data object WatchFace : Screen("watchface", "Watch Face", "FACE")
     data object Settings : Screen("settings", "Settings", "CFG")
+    data object Proximity : Screen("proximity", "Proximity", "RSSI")
 }
 
 /**
@@ -78,6 +80,7 @@ fun MainAppScaffold() {
     val screens = listOf(
         Screen.Dashboard,
         Screen.WatchFace,
+        Screen.Proximity,
         Screen.Settings
     )
 
@@ -164,6 +167,11 @@ fun MainAppScaffold() {
             composable(Screen.Settings.route) {
                 val settingsViewModel: SettingsViewModel = hiltViewModel()
                 SettingsScreen(viewModel = settingsViewModel)
+            }
+
+            composable(Screen.Proximity.route) {
+                val proximityViewModel: com.unlockedwear.mobile.ui.viewmodels.ProximityViewModel = hiltViewModel()
+                ProximityLabScreen(viewModel = proximityViewModel)
             }
         }
     }
